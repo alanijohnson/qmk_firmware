@@ -1,4 +1,4 @@
-/* Copyright 2022 Thomas Baart <thomas@splitkb.com>
+/* Copyright 2020 QMK
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +16,7 @@
 
 #pragma once
 
-#ifdef RGBLIGHT_ENABLE
-#    define RGBLIGHT_ANIMATIONS
-#    define RGBLIGHT_HUE_STEP  8
-#    define RGBLIGHT_SAT_STEP  8
-#    define RGBLIGHT_VAL_STEP  8
-#    define RGBLIGHT_LIMIT_VAL 150
-#endif
+#define CH_CFG_ST_RESOLUTION 16
+#define CH_CFG_ST_FREQUENCY  10000
 
-// Lets you roll mod-tap keys
-#define IGNORE_MOD_TAP_INTERRUPT
-
-#define TAPPING_TERM 200
+#include_next "chconf.h"

@@ -1,4 +1,4 @@
-/* Copyright 2022 Thomas Baart <thomas@splitkb.com>
+/* Copyright 2019 Thomas Baart <thomas@splitkb.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +16,4 @@
 
 #pragma once
 
-#ifdef RGBLIGHT_ENABLE
-#    define RGBLIGHT_ANIMATIONS
-#    define RGBLIGHT_HUE_STEP  8
-#    define RGBLIGHT_SAT_STEP  8
-#    define RGBLIGHT_VAL_STEP  8
-#    define RGBLIGHT_LIMIT_VAL 150
-#endif
-
-// Lets you roll mod-tap keys
-#define IGNORE_MOD_TAP_INTERRUPT
-
-#define TAPPING_TERM 200
+#include "rev1.h"

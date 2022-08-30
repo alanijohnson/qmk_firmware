@@ -1,4 +1,4 @@
-/* Copyright 2022 Thomas Baart <thomas@splitkb.com>
+/* Copyright 2019 Thomas Baart <thomas@splitkb.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +16,33 @@
 
 #pragma once
 
-#ifdef RGBLIGHT_ENABLE
-#    define RGBLIGHT_ANIMATIONS
-#    define RGBLIGHT_HUE_STEP  8
-#    define RGBLIGHT_SAT_STEP  8
-#    define RGBLIGHT_VAL_STEP  8
-#    define RGBLIGHT_LIMIT_VAL 150
-#endif
-
-// Lets you roll mod-tap keys
+#define EE_HANDS
 #define IGNORE_MOD_TAP_INTERRUPT
 
-#define TAPPING_TERM 200
+// Fix for Elite C rev3
+#define SPLIT_USB_DETECT
+// Speed up slave half startup
+#define SPLIT_USB_TIMEOUT 1000
+
+#ifdef OLED_ENABLE
+#    define OLED_DISPLAY_128X64
+#    define OLED_TIMEOUT 10000
+#endif
+
+#ifdef RGBLIGHT_ENABLE
+#    define RGBLIGHT_EFFECT_BREATHING
+#    define RGBLIGHT_EFFECT_RAINBOW_MOOD
+#    define RGBLIGHT_EFFECT_RAINBOW_SWIRL
+#    define RGBLIGHT_EFFECT_KNIGHT
+#endif
+
+#ifdef ENCODER_ENABLE
+#    define ENCODER_DIRECTION_FLIP
+#    define ENCODER_RESOLUTION 2
+#endif
+
+#ifdef THUMBSTICK_ENABLE
+#    define THUMBSTICK_FLIP_X
+#    define THUMBSTICK_PIN_X F0
+#    define THUMBSTICK_PIN_Y F1
+#endif

@@ -1,4 +1,4 @@
-/* Copyright 2022 Thomas Baart <thomas@splitkb.com>
+/* Copyright 2019 Thomas Baart <thomas@splitkb.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +16,18 @@
 
 #pragma once
 
-#ifdef RGBLIGHT_ENABLE
-#    define RGBLIGHT_ANIMATIONS
-#    define RGBLIGHT_HUE_STEP  8
-#    define RGBLIGHT_SAT_STEP  8
-#    define RGBLIGHT_VAL_STEP  8
-#    define RGBLIGHT_LIMIT_VAL 150
+#ifdef OLED_ENABLE
+  #define OLED_DISPLAY_128X64
 #endif
 
-// Lets you roll mod-tap keys
-#define IGNORE_MOD_TAP_INTERRUPT
+#define ENCODER_RESOLUTION 2
 
+#define TAPPING_FORCE_HOLD
 #define TAPPING_TERM 200
+#define AUTO_SHIFT_TIMEOUT 150
+
+#define MOUSEKEY_DELAY 100
+#define MOUSEKEY_INTERVAL 16
+#define MOUSEKEY_MAX_SPEED 2
+#define MOUSEKEY_WHEEL_MAX_SPEED 42
+#define MOUSEKEY_WHEEL_TIME_TO_MAX 15

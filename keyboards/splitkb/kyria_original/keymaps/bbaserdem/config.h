@@ -1,4 +1,5 @@
-/* Copyright 2022 Thomas Baart <thomas@splitkb.com>
+/* Copyright 2021 Batuhan Başerdem
+ * <baserdem.batuhan@gmail.com> @bbaserdem
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +17,16 @@
 
 #pragma once
 
-#ifdef RGBLIGHT_ENABLE
-#    define RGBLIGHT_ANIMATIONS
-#    define RGBLIGHT_HUE_STEP  8
-#    define RGBLIGHT_SAT_STEP  8
-#    define RGBLIGHT_VAL_STEP  8
-#    define RGBLIGHT_LIMIT_VAL 150
+// Kyria specific
+#ifdef KEYBOARD_splitkb_kyria_rev1
+    // Split definition; use the following to flash;
+    //  pro-micro:      avrdude-split-left/right
+    //  elite-c:        dfu-split-left/right
+#   define ENCODER_DIRECTION_FLIP
+#   define EE_HANDS
+
+    // Make sure kyria has bigger oled display
+#   ifdef OLED_ENABLE
+#   define OLED_DISPLAY_128X64
+#   endif
 #endif
-
-// Lets you roll mod-tap keys
-#define IGNORE_MOD_TAP_INTERRUPT
-
-#define TAPPING_TERM 200
