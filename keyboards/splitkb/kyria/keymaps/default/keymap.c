@@ -10,7 +10,11 @@
  *
  * v0.1 (Dec 2022):
  *   -- Update OLED on follower 1/2 to include built by Alani
- *   -- Addition of help button. The help button allows user to see what keyboard code is being pressed.
+ *   -- Addition of help button. The help button allows user to see what keyboard code is being pressed. (This functionality was not implemented)
+ *
+ * v1.0.x (Jan 29 2022):
+ *   -- Add OLED display characters x = 0
+ *
  *
  * Details on derivation below
  * Copyright 2019 Thomas Baart <thomas@splitkb.com>
@@ -29,6 +33,86 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include QMK_KEYBOARD_H
+#include <string.h>
+#include <stdint.h>
+
+#define softwareVersion "1.0.0"
+
+void placeByteAtPixel(int data, uint8_t right, uint8_t down, bool invert) {
+    const int powers[] = {1, 2, 4, 8, 16, 32, 64, 128};
+    int i;
+    int remainingValue = data;
+    bool isOn;
+    for (i = 7; i >= 0 ; i--) {
+        // if (remainingValue == 0) break;
+        isOn = remainingValue / powers[i] > 0;
+        if (invert) isOn = !isOn;
+        oled_write_pixel(right, down + i, isOn);
+        remainingValue = remainingValue % powers[i]; 
+    };
+};
+
+// int invertHex(char data) {
+//     const int powers[] = {1, 2, 4, 8, 16, 32, 64, 128};
+//     int i;
+//     char remainingValue = data;
+//     int newHex = 0;
+//     bool isOn;
+//     for (i = 7; i >= 0 ; i--) {
+//         isOn = remainingValue / powers[i] > 0;
+//         if (!isOn) newHex += powers[i];
+//         remainingValue = remainingValue % powers[i]; 
+//     };
+    
+//     return newHex;
+// };
+
+// void invertHexArray (const char data[], int length, char* invertedArray) {
+//     memcpy(invertedArray, data, sizeof(*data) * length);
+// };
+
+void oled_write_raw_sized(const int data[], int col, int row, int width, int height, bool invert) {
+    const int len = width * height / 8;
+    int i;
+    for(i = 0; i < len; i++) {
+        // exceeded the desired of number of rows to create
+        // if (i / width > height ) {
+        //     break;
+        // };
+        placeByteAtPixel(data[i], col + (i % width), 8 * (row + (i / width)), invert);
+        // placeByteAtPixel(data[i], col + i, row + 0, false);
+
+    };
+};
+
+void clear_section(const int data, int col, int row, int width, int height, bool invert) {
+    const int len = width * height / 8;
+    int i;
+    for(i = 0; i < len; i++) {
+        // exceeded the desired of number of rows to create
+        // if (i / width > height ) {
+        //     break;
+        // };
+        placeByteAtPixel(data, col + (i % width), 8 * (row + (i / width)), invert);
+        // placeByteAtPixel(data[i], col + i, row + 0, false);
+
+    };
+};
+
+
+// void oled_write_raw_sliced(const char data[], int col, int row, int width, int height, bool invert) {
+//     // oled_set_cursor(row, col);
+//     const int writes = height / 8;
+//     char slicedArray[width]; 
+
+//     for(int i=0; i<writes; i++){
+//         for (int j=0; j<width; j++ ) {
+//             slicedArray[0] = data[i * width + j];
+//         };
+//         oled_write_raw_P(slicedArray, sizeof(slicedArray));
+//         oled_set_cursor(col, row + ( 8 * i));
+//     }
+// }
 
 enum layers {
     _QWERTY = 0,
@@ -87,7 +171,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     * Base Layer: QWERTY
     *
     * ,-------------------------------------------.                              ,-------------------------------------------.
-    * |  Tab   |   Q  |   W  |   E  |   R  |   T  |                              |   Y  |   U  |   I  |   O  |   P  |  CP/PST  |
+    * |  Tab   |   Q  |   W  |   E  |   R  |   T  |                              |   Y  |   U  |   I  |   O  |   P  | CP/PST |
     * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
     * |Ctrl/Esc|   A  |   S  |   D  |   F  |   G  |                              |   H  |   J  |   K  |   L  | ;  : |Ctrl/' "|
     * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
@@ -277,12 +361,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     *                        |      |      |      |      |      |  |      |      |      |      |      |
     *                        `----------------------------------'  `----------------------------------'
     */
-    [_ADJUST] = LAYOUT(
-      _______, _______, _______, QWERTY , _______, _______,                                    _______, _______, _______, _______,  _______, _______,
-      _______, _______, _______, DVORAK , _______, _______,                                    RGB_TOG, RGB_SAI, RGB_HUI, RGB_VAI,  RGB_MOD, _______,
-      _______, _______, _______, COLEMAK, _______, _______,_______, _______, _______, _______, _______, RGB_SAD, RGB_HUD, RGB_VAD, RGB_RMOD, _______,
-                                 _______, _______, _______,_______, _______, _______, _______, _______, _______, _______
-    ),
+    // [_ADJUST] = LAYOUT(
+    //   _______, _______, _______, QWERTY , _______, _______,                                    _______, _______, _______, _______,  _______, _______,
+    //   _______, _______, _______, DVORAK , _______, _______,                                    RGB_TOG, RGB_SAI, RGB_HUI, RGB_VAI,  RGB_MOD, _______,
+    //   _______, _______, _______, COLEMAK, _______, _______,_______, _______, _______, _______, _______, RGB_SAD, RGB_HUD, RGB_VAD, RGB_RMOD, _______,
+    //                              _______, _______, _______,_______, _______, _______, _______, _______, _______, _______
+    // ),
     // /*
     //  * DAILY LAYER
     //  *
@@ -334,6 +418,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * DO NOT edit the rev1.c file; instead override the weakly defined default functions by your own.
  */
 
+ // https://github.com/qmk/qmk_firmware/blob/master/keyboards/cannonkeys/satisfaction75/satisfaction_oled.c#L112
+ // https://www.youtube.com/watch?v=qP6VCA1q77M&t=968s
+
 
 #ifdef OLED_ENABLE
 oled_rotation_t oled_init_user(oled_rotation_t rotation) { return OLED_ROTATION_180; }
@@ -341,58 +428,200 @@ oled_rotation_t oled_init_user(oled_rotation_t rotation) { return OLED_ROTATION_
 bool oled_task_user(void) {
     // logo editor: https://joric.github.io/qle/
     // Text to pixels: https://www.gamergeeks.net/apps/pixel/letter-text-generator
+    // image to oled array: https://javl.github.io/image2cpp/
     if (is_keyboard_master()) {
         // QMK Logo and version information
         // clang-format off
-        static const char PROGMEM qmk_logo[] = {
-            0x80,0x81,0x82,0x83,0x84,0x85,0x86,0x87,0x88,0x89,0x8a,0x8b,0x8c,0x8d,0x8e,0x8f,0x90,0x91,0x92,0x93,0x94,
-            0xa0,0xa1,0xa2,0xa3,0xa4,0xa5,0xa6,0xa7,0xa8,0xa9,0xaa,0xab,0xac,0xad,0xae,0xaf,0xb0,0xb1,0xb2,0xb3,0xb4,
-            0xc0,0xc1,0xc2,0xc3,0xc4,0xc5,0xc6,0xc7,0xc8,0xc9,0xca,0xcb,0xcc,0xcd,0xce,0xcf,0xd0,0xd1,0xd2,0xd3,0xd4,0};
+        // static const char PROGMEM qmk_logo[] = {
+        //     0x80,0x81,0x82,0x83,0x84,0x85,0x86,0x87,0x88,0x89,0x8a,0x8b,0x8c,0x8d,0x8e,0x8f,0x90,0x91,0x92,0x93,0x94,
+        //     0xa0,0xa1,0xa2,0xa3,0xa4,0xa5,0xa6,0xa7,0xa8,0xa9,0xaa,0xab,0xac,0xad,0xae,0xaf,0xb0,0xb1,0xb2,0xb3,0xb4,
+        //     0xc0,0xc1,0xc2,0xc3,0xc4,0xc5,0xc6,0xc7,0xc8,0xc9,0xca,0xcb,0xcc,0xcd,0xce,0xcf,0xd0,0xd1,0xd2,0xd3,0xd4,0};
         // clang-format on
 
-        oled_write_P(qmk_logo, false);
-        oled_write_P(PSTR("Kyria rev1.0\n\n"), false);
+        static const int shortcuts24x24[] = {
+            0xe0, 0xf0, 0xf8, 0xfc, 0xfc, 0xfc, 0xfc, 0xfc, 0xf8, 0xf8, 0xf0, 0xe0, 0xe0, 0xf0, 0xf8, 0xfc, 
+            0xfc, 0xfc, 0xfc, 0xfc, 0xf8, 0xf8, 0xf0, 0xc0, 0x07, 0x1f, 0x3f, 0x7f, 0xff, 0xff, 0xff, 0xff, 
+            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f, 0x3f, 0x0f, 0x07, 
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0x3f, 0x3f, 0x1f, 0x0f, 
+            0x07, 0x03, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+
+        static const int  nav24x24[] = {
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x80, 0xc0, 0xc0, 0xe0, 0xe0, 0xf0, 0xf0, 
+            0xf8, 0xf8, 0xfc, 0xfc, 0xfc, 0x3e, 0x0e, 0x03, 0x08, 0x0c, 0x0c, 0x0e, 0x1e, 0x1f, 0x1f, 0x1f, 
+            0x1f, 0x1f, 0x3f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f, 0x0f, 0x03, 0x00, 0x00, 0x00, 0x00, 
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1f, 0xff, 0x3f, 0x0f, 0x03, 
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+
+        static const int  fn24x24[] = {
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xf0, 0x70, 0x38, 0x18, 
+            0x38, 0x70, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+            0x0c, 0x0c, 0x0c, 0xff, 0xff, 0x0c, 0x0c, 0x0c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x0e, 0x1c, 0x18, 0x1c, 0x0e, 0x0f, 0x03, 0x00, 0x00, 0x00, 
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+
+        static const int symbol24x24[] = {
+                    0,  0,  0,  0,  0,  0,  0,  0,  0,254,254,  6,  0,  0,  0,254,254,  6,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,192,195,195,195,255,255,195,195,195,195,255,255,195,195,195,  3,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 96,127,127,  0,  0,  0, 96,127,127,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+
+        };
+        
+        static const int layer72x16[] = {
+            0,  0,255,255,255,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,128,204,204,204,204,204,220,252,248,240,  0,252,252,252,128,  0,128,192,240,252,252,252,  0,192,240,248,248,184,184,184,184,248,240,224,  0,248,248,248,224,240,120, 56, 56,120,240,224,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,127,127,127,112,112,112,112,112,112,112,112,  0, 15, 31,127,123,113,113,113,123, 63,127,127,  0,  0,  3, 51,115,115,115,115,121,127, 63, 31,  0, 15, 31, 63,123,115,115,115,115,123, 59,  9,  0, 63,127,127,  1,  0,  0,
+            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+        };
+
+        // const int command24x32[] = {
+        //     0xff, 0xff, 0xff, 0x7f, 0x3f, 0x3f, 0x3f, 0x3f, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f, 
+        //     0x3f, 0x3f, 0x3f, 0x3f, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xf0, 0xe0, 0xc6, 0xcf, 0xcf, 0xce, 
+        //     0x00, 0x00, 0xcf, 0xcf, 0xcf, 0xcf, 0x00, 0x00, 0xce, 0xcf, 0xcf, 0xc6, 0xe0, 0xf0, 0xff, 0xff, 
+        //     0xff, 0xff, 0x0f, 0x07, 0x63, 0xf3, 0xf3, 0x73, 0x00, 0x00, 0xf3, 0xf3, 0xf3, 0xf3, 0x00, 0x00, 
+        //     0x73, 0xf3, 0xf3, 0x63, 0x07, 0x0f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0xfc, 0xfc, 0xfc, 0xfc, 
+        //     0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0xfc, 0xfc, 0xfc, 0xfc, 0xfe, 0xff, 0xff, 0xff    
+        // };
+
+
+        // const int cntrl24x32[] = {
+        //     15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,  0,  0,  0,  0,  0,  0,128,192,224,240,248,252,252,248,240,224,192,128,  0,  0,  0,  0,  0,  0,  0,  0,  0,  4, 14, 31, 31, 15,  7,  3,  1,  0,  0,  1,  3,  7, 15, 31, 31, 14,  4,  0,  0,  0,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,
+        // };
+
+    
+
+        // const int opt24x32[] = {
+        //     0x00,0x00,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x00,0x00,0x00,0x00,0x00,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x00,0x00,0x00,0x00,0x00,0x01,0x01,0x01,0x01,0x01,0x03,0x0F,0x3E,0xF8,0xE0,0x80,0x00,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x03,0x0F,0x3E,0xF8,0xE0,0x80,0x80,0x80,0x80,0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x01,0x01,0x01,0x01,0x01,0x00,0x00,0x00
+        // };
+
+    
+
+        // const int capslock24x32[] = {
+        //     0,  0,  0,  0,  0,  0,  0,  0,128, 64,160,208,208,160, 64,128,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 16, 24, 20, 18,245,  6,255,255,255,255,255,255,  6,245, 18, 20, 24, 16,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,159,144,151,151,151,151,151,151,144,159,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 15,  8, 10, 10, 10, 10, 10, 10,  8, 15,  0,  0,  0,  0,  0,  0,  0,
+
+        // };
+
+        //  const int shift24x32[] = {
+        //     0,  0,  0,  0,  0,  0,  0,  0,  0,128,192,224,224,192,128,  0,  0,  0,  0,  0,  0,  0,  0,  0,  
+        //     0,128,192,224,240,184,156,142,  7,  3,  1,  0,  0,  1,  3,  7,142,156,184,240,224,192,128,  0,  
+        //     0,  1,  1,  1,  1,  1,255,255,  0,  0,  0,  0,  0,  0,  0,  0,255,255,  1,  1,  1,  1,  1,  0,  
+        //     0,  0,  0,  0,  0,  0,  3,  7,  6,  6,  6,  6,  6,  6,  6,  6,  7,  3,  0,  0,  0,  0,  0,  0,
+
+        // };
+
+        // const int white16x8[] = {
+        //     255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+        //     // 255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+        //     // 255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+        //     // 255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+        //     // 255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+        //     // 255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+        //     // 255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+        //     // 255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+        //     // 255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+        //     // 255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255
+        // };
+
+        // oled_write_P(qmk_logo, false);
+
+        // oled_write_P(shortcuts24x24, false);
+        // oled_write_P(PSTR(LASTKEY), false);
+        
+         // layer was made with black text
+        // oled_write_raw_byte(255, 554);
+        // oled_write_raw_byte(255, 555);
+        // oled_write_raw_byte(255, 1023);
+        // oled_write_raw_byte(255, 1022);
+        // oled_set_cursor(0, 17); // move cursor for positioning of layer icon
+
+        // oled_write_raw_sized(layer72x16, 128, 64, 72, 16, false);
+
+        // placeByteAtPixel(255, 0, 60, false);
+        // placeByteAtPixel(255, 100, 0, false);
+        // placeByteAtPixel(120, 50, 50, false);
+        // placeByteAtPixel(120, 50, 0, false);
+
+        // oled_write_raw_sized(command24x32, 128, 64, 24, 32, false);
+        // oled_write_raw_sized(shift24x32, 128, 64, 24, 32, false);
+        // oled_write_raw_sized(shortcuts24x24, 128, 64, 24, 32, false);
+        // oled_write_raw_sized(nav24x24, 128, 64, 24, 32, false);
+        // oled_write_raw_sized(opt24x32, 128, 64, 24, 32, false);
+        // oled_write_raw_sized(symbol24x24, 128, 64, 24, 32, false);
+        // oled_write_raw_sized(fn24x24, 128, 64, 24, 32, false);
+        // oled_write_raw_sized(capslock24x32, 128, 64, 24, 32, false);
+        // oled_write_raw_sized(cntrl24x32, 128, 64, 24, 32, false);
+
+
+        
+        oled_write_raw_sized(layer72x16, 0, 0, 72, 16, false);
+        // oled_write_raw_sized(white16x8, 25, 5, 16, 8, false);
+        // oled_write_raw_sized(shift24x32, 0, 0, 24, 32, false);
+        // oled_write_raw_sized(white16x8, 10, 0, 1, 8, false);
+        // oled_write_raw_sized(white16x8, 50, 0, 1, 8, false);
+        // oled_write_raw_sized(shift24x32, 10, 50, 24, 32, false);
+        // oled_write_raw_sized(white16x8, 10, 100, 1, 8, false);
+
+   
+
+        // oled_write_raw_sliced(layer72x16, 0, 0, 72, 16, false);
+        
+        // oled_write_raw_sized(white16x8, 100, 100, 16, 8, false);
+        // oled_set_cursor(40, 40);
+        // oled_write_raw_P(layer72x16, sizeof(layer72x16));
+        // oled_write_raw_P(shift24x32, sizeof(shift24x32));
+        // oled_write_P(layer72x16, true);
+        // oled_write_P(shift24x32, false);    
+        // oled_write_raw_sized(shift24x32, 64, 64, 24, 32, false);
 
 
         // Host Keyboard Layer Status
-        oled_write_P(PSTR("Layer: "), false);
         switch (get_highest_layer(layer_state|default_layer_state)) {
             case _QWERTY:
-                oled_write_P(PSTR("QWERTY\n"), false);
+                clear_section(255, 74, 0, 24, 24, true);
                 break;
-            case _DVORAK:
-                oled_write_P(PSTR("Dvorak\n"), false);
-                break;
-            case _COLEMAK_DH:
-                oled_write_P(PSTR("Colemak-DH\n"), false);
-                break;
+            // case _DVORAK:
+            //     oled_write_P(PSTR("Dvorak\n"), false);
+            //     break;
+            // case _COLEMAK_DH:
+            //     oled_write_P(PSTR("Colemak-DH\n"), false);
+            //     break;
             case _NAV:
-                oled_write_P(PSTR("Nav\n"), false);
+                // oled_write_P(PSTR("Nav\n"), false);
+                oled_write_raw_sized(nav24x24, 74, 0, 24, 24, false);
                 break;
             case _SYM:
-                oled_write_P(PSTR("Symbol\n"), false);
+                // oled_write_P(PSTR("Symbol\n"), false);
+                oled_write_raw_sized(symbol24x24, 74, 0, 24, 24, false);
                 break;
             case _FUNCTION:
-                oled_write_P(PSTR("Function\n"), false);
+                // oled_write_P(PSTR("Function\n"), false);
+                oled_write_raw_sized(fn24x24, 74, 0, 24, 24, false);
                 break;
-            case _ADJUST:
-                oled_write_P(PSTR("Adjust\n"), false);
-                break;
+            // case _ADJUST:
+            //     oled_write_P(PSTR("Adjust\n"), false);
+            //     break;
             case _DAILY:
-                oled_write_P(PSTR("Daily\n"), false);
+                // oled_write_P(PSTR("Daily\n"), false);
+                oled_write_raw_sized(shortcuts24x24, 74, 0, 24, 24, false);
                 break;
             case _IDE:
-                oled_write_P(PSTR("IDE\n"), false);
-                break;
+                // oled_write_P(PSTR("IDE\n"), false);
+                // break;
             default:
-                oled_write_P(PSTR("Undefined\n"), false);
+                // oled_write_raw_sized(white16x8, 0, 16, 40, 40, false);
+                oled_write_P(PSTR("Add to Content\n"), false);
         }
+    
+        // led_t led_usb_state = host_keyboard_led_state();
+        // oled_write_raw_sized(capslock24x32, 80, 16, 24, 32, led_usb_state.caps_lock);
 
-        // Write host Keyboard LED Status to OLEDs
-        led_t led_usb_state = host_keyboard_led_state();
-        oled_write_P(led_usb_state.num_lock    ? PSTR("NUMLCK ") : PSTR("       "), false);
-        oled_write_P(led_usb_state.caps_lock   ? PSTR("CAPLCK ") : PSTR("       "), false);
-        oled_write_P(led_usb_state.scroll_lock ? PSTR("SCRLCK ") : PSTR("       "), false);
+        // uint8_t mod_state = get_mods();
+        // oled_write_raw_sized(shift24x32, 80, 40, 24, 32, mod_state & MOD_MASK_SHIFT);
+        // oled_write_raw_sized(cntrl24x32, 0, 16, 24, 32, mod_state & MOD_MASK_CTRL);
+        // oled_write_raw_sized(opt24x32, 0, 16, 24, 32, mod_state & MOD_MASK_ALT);
+        // oled_write_raw_sized(command24x32, 0, 16, 24, 32, mod_state & MOD_MASK_GUI);
+
+        // oled_set_cursor(1, 63);
+        // oled_write_P(PSTR(softwareVersion), false);
+
     } else {
         // ORIGINAL
         // clang-format off
