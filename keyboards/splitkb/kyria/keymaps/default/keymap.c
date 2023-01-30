@@ -49,9 +49,6 @@ enum custom_keycodes {
     HELP,
 };
 
-uint16_t LASTKEY;
-
-
 // Aliases for readability
 #define QWERTY   DF(_QWERTY)
 #define COLEMAK  DF(_COLEMAK_DH)
@@ -355,7 +352,7 @@ bool oled_task_user(void) {
 
         oled_write_P(qmk_logo, false);
         oled_write_P(PSTR("Kyria rev1.0\n\n"), false);
-        oled_write_P(PSTR(LASTKEY), false);
+
 
         // Host Keyboard Layer Status
         oled_write_P(PSTR("Layer: "), false);
@@ -487,7 +484,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             break;
     }
-    LASTKEY = keycode;
     return true;
 };
 
