@@ -35,17 +35,34 @@
 #include QMK_KEYBOARD_H
 #include <string.h>
 #include <stdint.h>
+#include "progmem.h"
 
 #define softwareVersion "1.0.0"
 
-void placeByteAtPixel(int data, uint8_t right, uint8_t down, bool invert) {
-    const int powers[] = {1, 2, 4, 8, 16, 32, 64, 128};
+static const char PROGMEM capslock24x24[] = {
+        // 0,  0,  0,  0,  0,  0,  0,128,192, 96, 48, 24, 24, 48, 96,192,128,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 24, 28, 30, 27,249,248,  0,  0,  0,  0,  0,  0,248,249, 27, 30, 28, 24,  0,  0,  0,
+                0,  0,  0,  0,  0,  0,  0,128,192, 96, 48, 24, 24, 48, 96,192,128,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 24, 28, 22, 19,241,  0,  0,  0,  0,  0,  0,  0,  0,241, 19, 22, 28, 24,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25,  0,  0,  0,  0,  0,  0,  0,
+
+        };
+
+        static const char PROGMEM capslockwWord24x24[] = {
+        0,  0,  0,  0,  0,  0,  0,128,192,224,240,248,248,240,224,192,128,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 24, 28, 30, 31,248,192,143, 63,135,135, 63,143,192,248, 31, 30, 28, 24,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25,  0,  0,  0,  0,  0,  0,  0,
+
+        };
+
+        static const char PROGMEM layer72x16[] = {
+            0,  0,255,255,255,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,128,204,204,204,204,204,220,252,248,240,  0,252,252,252,128,  0,128,192,240,252,252,252,  0,192,240,248,248,184,184,184,184,248,240,224,  0,248,248,248,224,240,120, 56, 56,120,240,224,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,127,127,127,112,112,112,112,112,112,112,112,  0, 15, 31,127,123,113,113,113,123, 63,127,127,  0,  0,  3, 51,115,115,115,115,121,127, 63, 31,  0, 15, 31, 63,123,115,115,115,115,123, 59,  9,  0, 63,127,127,  1,  0,  0,
+            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+        };
+
+void placeByteAtPixel(uint8_t data, uint8_t right, uint8_t down, bool invert) {
+    const uint8_t powers[] = {1, 2, 4, 8, 16, 32, 64, 128};
     int i;
-    int remainingValue = data;
+    uint8_t remainingValue = data;
     bool isOn;
     for (i = 7; i >= 0 ; i--) {
         // if (remainingValue == 0) break;
-        if(right > 128 || down + i > 64) continue;
+        if(right >= 128 || down + i >= 64) continue;
         isOn = remainingValue / powers[i] > 0;
         if (invert) isOn = !isOn;
         oled_write_pixel(right, down + i, isOn);
@@ -54,19 +71,32 @@ void placeByteAtPixel(int data, uint8_t right, uint8_t down, bool invert) {
 };
 
 
-void oled_write_raw_sized(const int data[], int col, int row, int width, int height, bool invert) {
+void oled_write_raw_sized(const char *data, int col, int row, int width, int height, bool invert) {
     const int len = width * height / 8;
     int i;
     for(i = 0; i < len; i++) {
+        uint8_t c = pgm_read_byte(data++);
         // exceeded the desired of number of rows to create
         // if (i / width > height ) {
         //     break;
         // };
-        placeByteAtPixel(data[i], col + (i % width), (row + (8 * (i / width))), invert);
+        placeByteAtPixel(c, col + (i % width), (row + (8 * (i / width))), invert);
     };
 };
 
-void clear_section(const int data, int col, int row, int width, int height, bool invert) {
+// void oled_write_raw_P2(const char *data, int col, int row, int width, int height, bool invert) {
+//     uint16_t cursor_start_index = col * row;
+//     uint16_t size = width * height;
+//     if ((size + cursor_start_index) > OLED_MATRIX_SIZE) size = OLED_MATRIX_SIZE - cursor_start_index;
+//     for (uint16_t i = cursor_start_index; i < cursor_start_index + size; i++) {
+//         uint8_t c = pgm_read_byte(data++);
+//         // if (oled_buffer[i] == c) continue;
+//         // oled_buffer[i] = c;
+//         // oled_dirty |= ((OLED_BLOCK_TYPE)1 << (i / OLED_BLOCK_SIZE));
+//     }
+// }
+
+void fill_section(uint8_t data, int col, int row, int width, int height, bool invert) {
     const int len = width * height / 8;
     int i;
     for(i = 0; i < len; i++) {
@@ -74,7 +104,7 @@ void clear_section(const int data, int col, int row, int width, int height, bool
         // if (i / width > height ) {
         //     break;
         // };
-        placeByteAtPixel(data, col + (i % width), 8 * (row + (i / width)), invert);
+        placeByteAtPixel(data, col + (i % width), (row + (8 * (i / width))), invert);
     };
 };
 
@@ -96,6 +126,36 @@ enum custom_keycodes {
     CPY_PST,
     HELP,
 };
+
+typedef enum {
+    TD_NONE,
+    TD_UNKNOWN,
+    TD_SINGLE_TAP,
+    TD_SINGLE_HOLD,
+    TD_DOUBLE_TAP,
+    TD_DOUBLE_HOLD,
+    TD_DOUBLE_SINGLE_TAP, // Send two single taps
+    TD_TRIPLE_TAP,
+    TD_TRIPLE_HOLD
+} td_state_t;
+
+typedef struct {
+    bool is_press_action;
+    td_state_t state;
+} td_tap_t;
+
+// Tap dance enums
+enum {
+    X_CTL,
+    CAPS_WDLK
+};
+
+td_state_t cur_dance(qk_tap_dance_state_t *state);
+
+// For the x tap dance. Put it here so it can be used in any keymap
+void x_finished(qk_tap_dance_state_t *state, void *user_data);
+void x_reset(qk_tap_dance_state_t *state, void *user_data);
+
 
 // Aliases for readability
 #define QWERTY   DF(_QWERTY)
@@ -132,7 +192,7 @@ enum custom_keycodes {
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /*
-    * Base Layer: QWERTY
+    * Base Layer: QWERTYxxxxxxxxxxxx
     *
     * ,-------------------------------------------.                              ,-------------------------------------------.
     * |  Tab   |   Q  |   W  |   E  |   R  |   T  |                              |   Y  |   U  |   I  |   O  |   P  | CP/PST |
@@ -148,7 +208,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_QWERTY] = LAYOUT(
      KC_TAB  , KC_Q ,  KC_W   ,  KC_E  ,   KC_R ,   KC_T ,                                        KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , CPY_PST,
      CTL_ESC , KC_A ,  KC_S   ,  KC_D  ,   KC_F ,   KC_G ,                                        KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT,
-     KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , SYM, DAILY,        KC_CAPS  , IDE, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
+     KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , TD(CAPS_WDLK), DAILY,        KC_CAPS  , IDE, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
                                 FKEYS , KC_LGUI, ALT_ENT, KC_BSPC , NAV   ,     SYM   , KC_SPC ,KC_RALT, KC_RGUI, HELP
     ),   
 
@@ -402,7 +462,7 @@ bool oled_task_user(void) {
         //     0xc0,0xc1,0xc2,0xc3,0xc4,0xc5,0xc6,0xc7,0xc8,0xc9,0xca,0xcb,0xcc,0xcd,0xce,0xcf,0xd0,0xd1,0xd2,0xd3,0xd4,0};
         // clang-format on
 
-        static const int shortcuts24x24[] = {
+        static const char PROGMEM shortcuts24x24[] = {
             0xe0, 0xf0, 0xf8, 0xfc, 0xfc, 0xfc, 0xfc, 0xfc, 0xf8, 0xf8, 0xf0, 0xe0, 0xe0, 0xf0, 0xf8, 0xfc, 
             0xfc, 0xfc, 0xfc, 0xfc, 0xf8, 0xf8, 0xf0, 0xc0, 0x07, 0x1f, 0x3f, 0x7f, 0xff, 0xff, 0xff, 0xff, 
             0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f, 0x3f, 0x0f, 0x07, 
@@ -410,7 +470,7 @@ bool oled_task_user(void) {
             0x07, 0x03, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00
         };
 
-        static const int  nav24x24[] = {
+        static const char  PROGMEM nav24x24[] = {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x80, 0xc0, 0xc0, 0xe0, 0xe0, 0xf0, 0xf0, 
             0xf8, 0xf8, 0xfc, 0xfc, 0xfc, 0x3e, 0x0e, 0x03, 0x08, 0x0c, 0x0c, 0x0e, 0x1e, 0x1f, 0x1f, 0x1f, 
             0x1f, 0x1f, 0x3f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f, 0x0f, 0x03, 0x00, 0x00, 0x00, 0x00, 
@@ -418,7 +478,7 @@ bool oled_task_user(void) {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
         };
 
-        static const int  fn24x24[] = {
+        static const char  PROGMEM fn24x24[] = {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xf0, 0x70, 0x38, 0x18, 
             0x38, 0x70, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
             0x0c, 0x0c, 0x0c, 0xff, 0xff, 0x0c, 0x0c, 0x0c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -426,17 +486,14 @@ bool oled_task_user(void) {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
         };
 
-        static const int symbol24x24[] = {
+        static const char PROGMEM symbol24x24[] = {
                     0,  0,  0,  0,  0,  0,  0,  0,  0,254,254,  6,  0,  0,  0,254,254,  6,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,192,195,195,195,255,255,195,195,195,195,255,255,195,195,195,  3,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 96,127,127,  0,  0,  0, 96,127,127,  0,  0,  0,  0,  0,  0,  0,  0,  0
 
         };
         
-        static const int layer72x16[] = {
-            0,  0,255,255,255,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,128,204,204,204,204,204,220,252,248,240,  0,252,252,252,128,  0,128,192,240,252,252,252,  0,192,240,248,248,184,184,184,184,248,240,224,  0,248,248,248,224,240,120, 56, 56,120,240,224,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,127,127,127,112,112,112,112,112,112,112,112,  0, 15, 31,127,123,113,113,113,123, 63,127,127,  0,  0,  3, 51,115,115,115,115,121,127, 63, 31,  0, 15, 31, 63,123,115,115,115,115,123, 59,  9,  0, 63,127,127,  1,  0,  0,
-            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
-        };
+        
 
-        static const int command24x24[] = {
+        static const char PROGMEM command24x24[] = {
             0x60, 0xf0, 0xf8, 0x1c, 0x1c, 0x18, 0xf8, 0xf0, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xf8, 0x18, 0x1c, 
 0x1c, 0xf8, 0xf0, 0x60, 0x00, 0x81, 0xc3, 0xc3, 0xc3, 0xc3, 0xff, 0xff, 0xc3, 0xc3, 0xc3, 0xc3, 
 0xff, 0xff, 0xc3, 0xc3, 0xc3, 0xc3, 0x81, 0x00, 0x06, 0x0f, 0x1f, 0x38, 0x38, 0x18, 0x1f, 0x0f, 
@@ -444,7 +501,7 @@ bool oled_task_user(void) {
         };
 
 
-        static const int control24x24[] = {
+        static const char PROGMEM control24x24[] = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xf0, 0x78, 0x3c, 0x1e, 0x0f, 0x07, 0x07, 0x0f, 
 0x1e, 0x3c, 0x78, 0xf0, 0xe0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -452,7 +509,7 @@ bool oled_task_user(void) {
 
     
 
-        static const int opt24x32[] = {
+        static const char PROGMEM opt24x32[] = {
             0x00, 0x30, 0x30, 0x30, 0x30, 0x30, 0xf0, 0xe0, 0x80, 0x00, 0x00, 0x30, 0x30, 0x30, 0x30, 0x30, 
 0x30, 0x30, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x0f, 0x3e, 0xf8, 0xe0, 
 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -460,48 +517,43 @@ bool oled_task_user(void) {
         };
     
 
-        static const int capslock24x24[] = {
-0x00, 0x00, 0x00, 0x80, 0xe0, 0xb0, 0x98, 0x0c, 0x06, 0x03, 0x03, 0x06, 0x0c, 0x98, 0xb0, 0xe0, 
-0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3f, 0x20, 0x20, 0x20, 0x20, 0x20, 
-0x20, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0f, 0x09, 
-0x09, 0x09, 0x09, 0x09, 0x09, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-        };
+        
 
-        static const int shift24x24[] = {
+        static const char PROGMEM shift24x24[] = {
              0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xc0, 0x60, 0x30, 0x18, 0x18, 0x30, 0x60, 0xc0, 0x80, 0x00, 
 0x00, 0x00, 0x00, 0x00, 0x00, 0x18, 0x1c, 0x1e, 0x1b, 0xf9, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 
 0x00, 0xf8, 0xf9, 0x1b, 0x1e, 0x1c, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1f, 0x1f, 0x10, 
 0x10, 0x10, 0x10, 0x10, 0x10, 0x1f, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00
         };
 
-        // setup
-        // oled_write_P(PSTR("\n\n\n\n\n\n\n\n\n"), false);
+        
         // oled_write_P(PSTR(softwareVersion), false);
-
-    
 
         uint8_t mod_state = get_mods();
         const int row = 0;
         // clear_section(255, 0, 0, 127, 58, true);
-        oled_write_raw_sized(command24x24, 0, row, 20, 24, mod_state && MOD_MASK_SHIFT); // icon made in white
-        oled_write_raw_sized(opt24x32, 26, row, 20, 24, mod_state && MOD_MASK_SHIFT);
-        oled_write_raw_sized(control24x24, 52, row, 20, 24, mod_state && MOD_MASK_SHIFT); // 52
-        oled_write_raw_sized(shift24x24, 78, 0, 20, 24, mod_state && MOD_MASK_SHIFT); // creates weirdness
+        if(true) {
+            oled_write_raw_sized(command24x24, 0, row, 20, 24, mod_state &  MOD_MASK_GUI); // icon made in white
+            oled_write_raw_sized(opt24x32, 26, row, 20, 24, mod_state & MOD_MASK_ALT);
+            oled_write_raw_sized(control24x24, 52, row, 20, 24, mod_state & MOD_MASK_CTRL); // 52
+            oled_write_raw_sized(shift24x24, 78, row, 20, 24, mod_state & MOD_MASK_SHIFT); // creates weirdness
+        }
+        
         
         
 
 
-        // Host Keyboard Layer Status
+        // Host Keyboard Layer Statusggg
         // oled_write_raw_sized(shift24x24, 0, 16, 20, 24, false);
-        if(false) oled_write_raw_sized(layer72x16, 0, 0, 72, 16, false);
+        if(true) oled_write_raw_sized(layer72x16, 0, 36, 72, 16, false);
         // oled_write_raw_sized(layer72x16, 0, 0, 72, 16, true);
 
         
        
         switch (get_highest_layer(layer_state|default_layer_state)) {
             case _QWERTY:
-                // clear_section(255, 74, 32, 24, 24, true);
-                // clear_section(255, 20, 76, 24, 24, false);
+                fill_section(0, 74, 32, 24, 24, false); // blank out symbols
+                // fill_section(255, 20, 76, 24, 24, false);
                 break;
             case _NAV:
                 oled_write_raw_sized(nav24x24, 74, 32, 24, 24, false);
@@ -515,18 +567,16 @@ bool oled_task_user(void) {
             case _DAILY:
                 oled_write_raw_sized(shortcuts24x24, 74, 32, 24, 24, false);
                 break;
-                // clear_section(255, 74, 32, 24, 24, false);
+                // fill_section(255, 74, 32, 24, 24, false);
         }
     
         led_t led_usb_state = host_keyboard_led_state();
-        if (true) oled_write_raw_sized(capslock24x24, 104, row, 20, 24, led_usb_state.caps_lock);
-
+        if (true) oled_write_raw_sized(is_caps_word_on() ? capslockwWord24x24 : capslock24x24, 104, row, 24, 24, led_usb_state.caps_lock);
         
         
 
-        // oled_set_cursor(, 63);
+        // oled_set_cursor(50, 8);
         // oled_write_P(PSTR(softwareVersion), false);
-        clear_section(255, 20, 76, 24, 24, false);
 
     } else {
         // ORIGINAL
@@ -600,5 +650,120 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
     return true;
 };
+
+/* Return an integer that corresponds to what kind of tap dance should be executed.
+ *
+ * How to figure out tap dance state: interrupted and pressed.
+ *
+ * Interrupted: If the state of a dance is "interrupted", that means that another key has been hit
+ *  under the tapping term. This is typically indicitive that you are trying to "tap" the key.
+ *
+ * Pressed: Whether or not the key is still being pressed. If this value is true, that means the tapping term
+ *  has ended, but the key is still being pressed down. This generally means the key is being "held".
+ *
+ * One thing that is currenlty not possible with qmk software in regards to tap dance is to mimic the "permissive hold"
+ *  feature. In general, advanced tap dances do not work well if they are used with commonly typed letters.
+ *  For example "A". Tap dances are best used on non-letter keys that are not hit while typing letters.
+ *
+ * Good places to put an advanced tap dance:
+ *  z,q,x,j,k,v,b, any function key, home/end, comma, semi-colon
+ *
+ * Criteria for "good placement" of a tap dance key:
+ *  Not a key that is hit frequently in a sentence
+ *  Not a key that is used frequently to double tap, for example 'tab' is often double tapped in a terminal, or
+ *    in a web form. So 'tab' would be a poor choice for a tap dance.
+ *  Letters used in common words as a double. For example 'p' in 'pepper'. If a tap dance function existed on the
+ *    letter 'p', the word 'pepper' would be quite frustating to type.
+ *
+ * For the third point, there does exist the 'TD_DOUBLE_SINGLE_TAP', however this is not fully tested
+ *
+ */
+td_state_t cur_dance(qk_tap_dance_state_t *state) {
+    if (state->count == 1) {
+        if (state->interrupted || !state->pressed) return TD_SINGLE_TAP;
+        // Key has not been interrupted, but the key is still held. Means you want to send a 'HOLD'.
+        else return TD_SINGLE_HOLD;
+    } else if (state->count == 2) {
+        // TD_DOUBLE_SINGLE_TAP is to distinguish between typing "pepper", and actually wanting a double tap
+        // action when hitting 'pp'. Suggested use case for this return value is when you want to send two
+        // keystrokes of the key, and not the 'double tap' action/macro.
+        if (state->interrupted) return TD_DOUBLE_SINGLE_TAP;
+        else if (state->pressed) return TD_DOUBLE_HOLD;
+        else return TD_DOUBLE_TAP;
+    }
+
+    // Assumes no one is trying to type the same letter three times (at least not quickly).
+    // If your tap dance key is 'KC_W', and you want to type "www." quickly - then you will need to add
+    // an exception here to return a 'TD_TRIPLE_SINGLE_TAP', and define that enum just like 'TD_DOUBLE_SINGLE_TAP'
+    if (state->count == 3) {
+        if (state->interrupted || !state->pressed) return TD_TRIPLE_TAP;
+        else return TD_TRIPLE_HOLD;
+    } else return TD_UNKNOWN;
+}
+
+// Create an instance of 'td_tap_t' for the 'x' tap dance.
+static td_tap_t xtap_state = {
+    .is_press_action = true,
+    .state = TD_NONE
+};
+
+void x_finished(qk_tap_dance_state_t *state, void *user_data) {
+    xtap_state.state = cur_dance(state);
+    switch (xtap_state.state) {
+        case TD_SINGLE_TAP: register_code(KC_X); break;
+        case TD_SINGLE_HOLD: register_code(KC_LCTL); break;
+        case TD_DOUBLE_TAP: register_code(KC_ESC); break;
+        case TD_DOUBLE_HOLD: register_code(KC_LALT); break;
+        // Last case is for fast typing. Assuming your key is `f`:
+        // For example, when typing the word `buffer`, and you want to make sure that you send `ff` and not `Esc`.
+        // In order to type `ff` when typing fast, the next character will have to be hit within the `TAPPING_TERM`, which by default is 200ms.
+        case TD_DOUBLE_SINGLE_TAP: tap_code(KC_X); register_code(KC_X); break;
+        default: break;
+    }
+}
+
+void x_reset(qk_tap_dance_state_t *state, void *user_data) {
+    switch (xtap_state.state) {
+        case TD_SINGLE_TAP: unregister_code(KC_X); break;
+        case TD_SINGLE_HOLD: unregister_code(KC_LCTL); break;
+        case TD_DOUBLE_TAP: unregister_code(KC_ESC); break;
+        case TD_DOUBLE_HOLD: unregister_code(KC_LALT); break;
+        case TD_DOUBLE_SINGLE_TAP: unregister_code(KC_X); break;
+        default: break;
+    }
+    xtap_state.state = TD_NONE;
+}
+
+void caps_finished(qk_tap_dance_state_t *state, void *user_data) {
+    xtap_state.state = cur_dance(state);
+    switch (xtap_state.state) {
+        case TD_SINGLE_TAP: caps_word_toggle(); break;
+        case TD_DOUBLE_TAP: tap_code(KC_CAPS); break;
+        // Last case is for fast typing. Assuming your key is `f`:
+        // For example, when typing the word `buffer`, and you want to make sure that you send `ff` and not `Esc`.
+        // In order to type `ff` when typing fast, the next character will have to be hit within the `TAPPING_TERM`, which by default is 200ms.
+        case TD_DOUBLE_SINGLE_TAP: tap_code(KC_X); register_code(KC_X); break;
+        default: break;
+    }
+}
+
+void caps_reset(qk_tap_dance_state_t *state, void *user_data) {
+    switch (xtap_state.state) {
+        case TD_SINGLE_TAP: unregister_code(KC_X); break;
+        case TD_SINGLE_HOLD: unregister_code(KC_LCTL); break;
+        case TD_DOUBLE_TAP: unregister_code(KC_ESC); break;
+        case TD_DOUBLE_HOLD: unregister_code(KC_LALT); break;
+        case TD_DOUBLE_SINGLE_TAP: unregister_code(KC_X); break;
+        default: break;
+    }
+    xtap_state.state = TD_NONE;
+}
+
+
+qk_tap_dance_action_t tap_dance_actions[] = {
+    [X_CTL] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, x_finished, x_reset),
+    [CAPS_WDLK] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, caps_finished, caps_reset),
+};
+
 
 
