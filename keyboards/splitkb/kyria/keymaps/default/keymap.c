@@ -14,6 +14,9 @@
  *
  * v1.0.x (Jan 29 2022):
  *   -- Add OLED display characters x = 0
+ *   -- Added Tap Dance Support
+ *   -- Added Copy paste tap dance
+ *   --
  *
  *
  * Details on derivation below
@@ -147,7 +150,8 @@ typedef struct {
 // Tap dance enums
 enum {
     X_CTL,
-    CAPS_WDLK
+    CAPS_WDLK,
+    CPY_PST_TD
 };
 
 td_state_t cur_dance(qk_tap_dance_state_t *state);
@@ -192,7 +196,7 @@ void x_reset(qk_tap_dance_state_t *state, void *user_data);
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /*
-    * Base Layer: QWERTYxxxxxxxxxxxx
+    * Base Layer: QWERTY
     *
     * ,-------------------------------------------.                              ,-------------------------------------------.
     * |  Tab   |   Q  |   W  |   E  |   R  |   T  |                              |   Y  |   U  |   I  |   O  |   P  | CP/PST |
@@ -208,8 +212,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_QWERTY] = LAYOUT(
      KC_TAB  , KC_Q ,  KC_W   ,  KC_E  ,   KC_R ,   KC_T ,                                        KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , CPY_PST,
      CTL_ESC , KC_A ,  KC_S   ,  KC_D  ,   KC_F ,   KC_G ,                                        KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT,
-     KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , TD(CAPS_WDLK), DAILY,        KC_CAPS  , IDE, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
-                                FKEYS , KC_LGUI, ALT_ENT, KC_BSPC , NAV   ,     SYM   , KC_SPC ,KC_RALT, KC_RGUI, HELP
+     KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , TD(CAPS_WDLK), DAILY,        KC_CAPS  , TD(CPY_PST_TD), KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
+                                FKEYS , KC_LGUI, ALT_ENT, KC_BSPC , NAV   ,     SYM   , KC_SPC ,KC_RALT, KC_RGUI, DAILY
     ),   
 
     /*
@@ -738,7 +742,7 @@ void caps_finished(qk_tap_dance_state_t *state, void *user_data) {
     xtap_state.state = cur_dance(state);
     switch (xtap_state.state) {
         case TD_SINGLE_TAP: caps_word_toggle(); break;
-        case TD_DOUBLE_TAP: tap_code(KC_CAPS); break;
+        case TD_DOUBLE_TAP: register_code(KC_CAPS); break;
         // Last case is for fast typing. Assuming your key is `f`:
         // For example, when typing the word `buffer`, and you want to make sure that you send `ff` and not `Esc`.
         // In order to type `ff` when typing fast, the next character will have to be hit within the `TAPPING_TERM`, which by default is 200ms.
@@ -749,11 +753,29 @@ void caps_finished(qk_tap_dance_state_t *state, void *user_data) {
 
 void caps_reset(qk_tap_dance_state_t *state, void *user_data) {
     switch (xtap_state.state) {
-        case TD_SINGLE_TAP: unregister_code(KC_X); break;
-        case TD_SINGLE_HOLD: unregister_code(KC_LCTL); break;
-        case TD_DOUBLE_TAP: unregister_code(KC_ESC); break;
-        case TD_DOUBLE_HOLD: unregister_code(KC_LALT); break;
-        case TD_DOUBLE_SINGLE_TAP: unregister_code(KC_X); break;
+        case TD_DOUBLE_TAP: unregister_code(KC_CAPS); break;
+        default: break;
+    }
+    xtap_state.state = TD_NONE;
+}
+
+void cpy_pst_finished(qk_tap_dance_state_t *state, void *user_data) {
+    xtap_state.state = cur_dance(state);
+    switch (xtap_state.state) {
+        case TD_SINGLE_TAP: register_code16(G(KC_V)); break;  // command paste - less friction compare to double tap
+        case TD_DOUBLE_TAP: register_code16(G(KC_C)); break;
+        // Last case is for fast typing. Assuming your key is `f`:
+        // For example, when typing the word `buffer`, and you want to make sure that you send `ff` and not `Esc`.
+        // In order to type `ff` when typing fast, the next character will have to be hit within the `TAPPING_TERM`, which by default is 200ms.
+        case TD_DOUBLE_SINGLE_TAP: tap_code(KC_X); register_code(KC_X); break;
+        default: break;
+    }
+}
+
+void cpy_pst_reset(qk_tap_dance_state_t *state, void *user_data) {
+    switch (xtap_state.state) {
+        case TD_SINGLE_TAP: unregister_code16(G(KC_V)); break;
+        case TD_DOUBLE_TAP: unregister_code16(G(KC_C)); break;
         default: break;
     }
     xtap_state.state = TD_NONE;
@@ -763,6 +785,7 @@ void caps_reset(qk_tap_dance_state_t *state, void *user_data) {
 qk_tap_dance_action_t tap_dance_actions[] = {
     [X_CTL] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, x_finished, x_reset),
     [CAPS_WDLK] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, caps_finished, caps_reset),
+    [CPY_PST_TD] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, cpy_pst_finished, cpy_pst_reset)
 };
 
 
