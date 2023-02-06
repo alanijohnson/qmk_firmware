@@ -2,7 +2,10 @@
 #define TAPDANCE 
 
 #include "enums.c"
+#define ONESHOT_TIMEOUT 200  /* Time (in ms) before the one shot key is released */
 
+bool isOneShot = false;
+bool locked_layer = false;
 
 typedef enum {
     TD_NONE,
@@ -20,6 +23,10 @@ typedef struct {
     bool is_press_action;
     td_state_t state;
 } td_tap_t;
+
+typedef struct {
+    int layer;
+} td_layer_tap_t;
 
 
 
@@ -149,11 +156,78 @@ void cpy_pst_reset(qk_tap_dance_state_t *state, void *user_data) {
     xtap_state.state = TD_NONE;
 }
 
+void layer_finished(qk_tap_dance_state_t *state, void *user_data) {
+    td_layer_tap_t *data = (td_layer_tap_t *)user_data;
+    int layer = data->layer;
+    // int current_layer = get_highest_layer(layer_state);
+
+    
+    xtap_state.state = cur_dance(state);
+    switch (xtap_state.state) {
+        case TD_SINGLE_TAP: { 
+            // one shot layer, if layer is locked clear
+            if (isOneShot) {
+                reset_oneshot_layer();
+            } else {
+                set_oneshot_layer(layer, ONESHOT_START);
+            }
+            
+            break;
+        }   
+        case TD_SINGLE_HOLD: { // set layer until release
+            isOneShot = false;
+            reset_oneshot_layer();
+            layer_move(layer); 
+            break; 
+        } 
+        case TD_DOUBLE_TAP: { // lock layer toggle. Turns off any existing layers
+            isOneShot = false;
+            reset_oneshot_layer();
+            if (layer_state_is(layer) && locked_layer) {
+                locked_layer = false;
+                layer_off(layer);
+            } else {
+                locked_layer = true;
+                layer_move(layer);
+            }	
+            break;
+        } // lock layer, if layer is locked clear
+        // Last case is for fast typing. Assuming your key is `f`:
+        // For example, when typing the word `buffer`, and you want to make sure that you send `ff` and not `Esc`.
+        // In order to type `ff` when typing fast, the next character will have to be hit within the `TAPPING_TERM`, which by default is 200ms.
+        case TD_DOUBLE_SINGLE_TAP: tap_code(KC_X); register_code(KC_X); break;
+        default: break;
+    }
+}
+
+void layer_reset(qk_tap_dance_state_t *state, void *user_data) {
+    td_layer_tap_t *data = (td_layer_tap_t *)user_data;
+    int layer = data->layer;
+    switch (xtap_state.state) {
+        case TD_SINGLE_TAP: {
+            clear_oneshot_layer_state(ONESHOT_PRESSED);
+            isOneShot = true;
+            break;
+        }
+        case TD_SINGLE_HOLD: layer_off(layer); break;
+        // case TD_DOUBLE_TAP: unregister_code(KC_D); break;
+        case TD_DOUBLE_SINGLE_TAP: unregister_code(KC_X); break;
+        default: {break;}
+    }
+    xtap_state.state = TD_NONE;
+}
+
+#define layer_tapdance(td_layer) (layer = td_layer; return ACTION_TAP_DANCE_FN_ADVANCED(NULL, layer_finished, layer_reset))
+
+
+#define LAYER_TAP_DANCE(td_layer) \
+    { .fn = {NULL, layer_finished, layer_reset}, .user_data = (void *)&((td_layer_tap_t){td_layer}), }
 
 qk_tap_dance_action_t tap_dance_actions[] = {
     [X_CTL] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, x_finished, x_reset),
     [CAPS_WDLK] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, caps_finished, caps_reset),
-    [CPY_PST_TD] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, cpy_pst_finished, cpy_pst_reset)
+    [CPY_PST_TD] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, cpy_pst_finished, cpy_pst_reset),
+    [DAILY_TD] = LAYER_TAP_DANCE(_DAILY),
 };
 
 #endif /* TAPDANCE */ 

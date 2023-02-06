@@ -5,6 +5,7 @@
 #include "enums.c"
 #define LAYOUT_wrapper(...)                  LAYOUT(__VA_ARGS__)
 
+
 // Aliases for readability
 #define QWERTY   DF(_QWERTY)
 #define COLEMAK  DF(_COLEMAK_DH)
@@ -15,6 +16,7 @@
 #define FKEYS    MO(_FUNCTION)
 #define ADJUST   MO(_ADJUST)
 #define DAILY    MO(_DAILY)
+#define DAILYOS  OSL(_DAILY)
 #define IDE      MO(_IDE)
 
 #define CTL_ESC  MT(MOD_LCTL, KC_ESC)
@@ -25,7 +27,6 @@
 #define REDO SGUI(KC_Z)
 #define SCREEN_TO_CLIPBOARD SGUI(KC_3)
 #define SCREEN_CAPTURE SGUI(KC_5)
-// #define TURN_ON_VO
 #define PREV_APP SGUI(KC_TAB)
 #define NEXT_APP G(KC_TAB)
 #define PREV_WINDOW LSA(KC_TILD)
@@ -46,7 +47,7 @@
 *                        `----------------------------------'  `----------------------------------'
 */
 #define qwerty_layout \
-KC_TAB  , KC_Q ,  KC_W   ,  KC_E  ,   KC_R ,   KC_T ,                                        KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , CPY_PST, \
+KC_TAB  , KC_Q ,  KC_W   ,  KC_E  ,   KC_R ,   KC_T ,                                        KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , TD(DAILY_TD), \
 CTL_ESC , KC_A ,  KC_S   ,  KC_D  ,   KC_F ,   KC_G ,                                        KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT, \
     KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , TD(CAPS_WDLK), DAILY,        KC_CAPS  , TD(CPY_PST_TD), KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT, \
                             FKEYS , KC_LGUI, ALT_ENT, KC_BSPC , NAV   ,     SYM   , KC_SPC ,KC_RALT, KC_RGUI, DAILY

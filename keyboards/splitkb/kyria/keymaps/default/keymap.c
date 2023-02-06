@@ -105,16 +105,16 @@ bool oled_task_user(void) {
                 // fill_section(255, 20, 76, 24, 24, false);
                 break;
             case _NAV:
-                oled_write_raw_sized(nav24x24, 74, 32, 24, 24, false);
+                oled_write_raw_sized(nav24x24, 74, 32, 24, 24, isOneShot);
                 break;
             case _SYM:
-                oled_write_raw_sized(symbol24x24, 74, 32, 24, 24, false);
+                oled_write_raw_sized(symbol24x24, 74, 32, 24, 24, isOneShot);
                 break;
             case _FUNCTION:
-                oled_write_raw_sized(fn24x24, 74, 32, 24, 24, false);
+                oled_write_raw_sized(fn24x24, 74, 32, 24, 24, isOneShot);
                 break;
             case _DAILY:
-                oled_write_raw_sized(shortcuts24x24, 74, 32, 24, 24, false);
+                oled_write_raw_sized(shortcuts24x24, 74, 32, 24, 24, isOneShot);
                 break;
         }
     

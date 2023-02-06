@@ -12,7 +12,8 @@ enum custom_keycodes {
 enum {
     X_CTL,
     CAPS_WDLK,
-    CPY_PST_TD
+    CPY_PST_TD,
+    DAILY_TD,
 };
 
 enum layers {
