@@ -244,6 +244,9 @@ void oled_write_raw_byte(const char data, uint16_t index);
 // Coordinates start at top-left and go right and down for positive x and y
 void oled_write_pixel(uint8_t x, uint8_t y, bool on);
 
+// TODO: write doc
+void oled_write_byte_at_pixel(uint8_t data, uint8_t x, uint8_t y, bool invert);
+
 #if defined(__AVR__)
 // Writes a PROGMEM string to the buffer at current cursor position
 // Advances the cursor while writing, inverts the pixels if true

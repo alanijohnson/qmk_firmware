@@ -12,11 +12,16 @@
  *   -- Update OLED on follower 1/2 to include built by Alani
  *   -- Addition of help button. The help button allows user to see what keyboard code is being pressed. (This functionality was not implemented)
  *
- * v1.0.x (Jan 29 2022):
- *   -- Add OLED display characters x = 0
+ * v1.0.0 (Jan 29 2023):
+ *   -- Add OLED display characters
  *   -- Added Tap Dance Support
  *   -- Added Copy paste tap dance
- *   --
+ *        -- Tap: 
+ *        -- Double Tap:
+ *   -- Added Caps caps word tap dance
+ *
+ * v2.0.0 (Feb 2 2023):
+ *   -- Move functions to oled driver
  *
  *
  * Details on derivation below
@@ -81,9 +86,9 @@ void oled_write_raw_sized(const char *data, int col, int row, int width, int hei
         uint8_t c = pgm_read_byte(data++);
         // exceeded the desired of number of rows to create
         // if (i / width > height ) {
-        //     break;
+        //     break;dgfdgdg
         // };
-        placeByteAtPixel(c, col + (i % width), (row + (8 * (i / width))), invert);
+        oled_write_byte_at_pixel(c, col + (i % width), (row + (8 * (i / width))), invert);
     };
 };
 
