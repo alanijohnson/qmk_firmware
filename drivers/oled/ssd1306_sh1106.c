@@ -530,16 +530,13 @@ void oled_write_pixel(uint8_t x, uint8_t y, bool on) {
 // 0,0 is top-left corner
 void oled_write_byte_at_pixel(uint8_t data, uint8_t x, uint8_t y, bool invert) {
     // TODO: remove powers + add bit manipulation ()
-    const char powers[] = {1, 2, 4, 8, 16, 32, 64, 128};
     int i;
-    char remainingValue = data;
     bool isOn;
-    for (i = 7; i >= 0 ; i--) {
+    for (i = 0; i <= 7 ; i++) {
         if(x >= OLED_DISPLAY_WIDTH || y + i >= OLED_DISPLAY_HEIGHT) continue;
-        isOn = remainingValue / powers[i] > 0;
+        isOn = (data >> i) & 1; 
         if (invert) isOn = !isOn;
         oled_write_pixel(x, y + i, isOn);
-        remainingValue = remainingValue % powers[i]; 
     };
 };
 
