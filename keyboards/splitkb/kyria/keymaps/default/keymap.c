@@ -20,7 +20,7 @@
  *        -- Double Tap:
  *   -- Added Caps caps word tap dance
  *
- * v2.0.0 (Feb 2 2023):
+ * v2.0.0 (Feb 5 2023):
  *   -- Move functions to oled driver
  *
  *
