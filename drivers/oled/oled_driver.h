@@ -244,8 +244,11 @@ void oled_write_raw_byte(const char data, uint16_t index);
 // Coordinates start at top-left and go right and down for positive x and y
 void oled_write_pixel(uint8_t x, uint8_t y, bool on);
 
-// TODO: write doc
+// Starting at a specific pixel writes a byte
+// Coordinates start at top-left and go right and down for positive x and y
 void oled_write_byte_at_pixel(uint8_t data, uint8_t x, uint8_t y, bool invert);
+
+void oled_fill_section(uint8_t data, int col, int row, int width, int height, bool invert);
 
 #if defined(__AVR__)
 // Writes a PROGMEM string to the buffer at current cursor position
@@ -261,6 +264,10 @@ void oled_write_ln_P(const char *data, bool invert);
 
 // Writes a PROGMEM string to the buffer at current cursor position
 void oled_write_raw_P(const char *data, uint16_t size);
+
+// Writes a PROGMEM string to the buffer at the specified position of the specified size
+void oled_write_raw_sized(const char *data, int col, int row, int width, int height, bool invert);
+
 #else
 #    define oled_write_P(data, invert) oled_write(data, invert)
 #    define oled_write_ln_P(data, invert) oled_write(data, invert)

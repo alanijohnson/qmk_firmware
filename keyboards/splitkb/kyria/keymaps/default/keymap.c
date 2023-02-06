@@ -63,34 +63,6 @@ static const char PROGMEM capslock24x24[] = {
             0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
         };
 
-void placeByteAtPixel(uint8_t data, uint8_t right, uint8_t down, bool invert) {
-    const uint8_t powers[] = {1, 2, 4, 8, 16, 32, 64, 128};
-    int i;
-    uint8_t remainingValue = data;
-    bool isOn;
-    for (i = 7; i >= 0 ; i--) {
-        // if (remainingValue == 0) break;
-        if(right >= 128 || down + i >= 64) continue;
-        isOn = remainingValue / powers[i] > 0;
-        if (invert) isOn = !isOn;
-        oled_write_pixel(right, down + i, isOn);
-        remainingValue = remainingValue % powers[i]; 
-    };
-};
-
-
-void oled_write_raw_sized(const char *data, int col, int row, int width, int height, bool invert) {
-    const int len = width * height / 8;
-    int i;
-    for(i = 0; i < len; i++) {
-        uint8_t c = pgm_read_byte(data++);
-        // exceeded the desired of number of rows to create
-        // if (i / width > height ) {
-        //     break;dgfdgdg
-        // };
-        oled_write_byte_at_pixel(c, col + (i % width), (row + (8 * (i / width))), invert);
-    };
-};
 
 // void oled_write_raw_P2(const char *data, int col, int row, int width, int height, bool invert) {
 //     uint16_t cursor_start_index = col * row;
@@ -104,17 +76,6 @@ void oled_write_raw_sized(const char *data, int col, int row, int width, int hei
 //     }
 // }
 
-void fill_section(uint8_t data, int col, int row, int width, int height, bool invert) {
-    const int len = width * height / 8;
-    int i;
-    for(i = 0; i < len; i++) {
-        // exceeded the desired of number of rows to create
-        // if (i / width > height ) {
-        //     break;
-        // };
-        placeByteAtPixel(data, col + (i % width), (row + (8 * (i / width))), invert);
-    };
-};
 
 enum layers {
     _QWERTY = 0,
@@ -561,7 +522,7 @@ bool oled_task_user(void) {
        
         switch (get_highest_layer(layer_state|default_layer_state)) {
             case _QWERTY:
-                fill_section(0, 74, 32, 24, 24, false); // blank out symbols
+                oled_fill_section(0, 74, 32, 24, 24, false); // blank out symbols
                 // fill_section(255, 20, 76, 24, 24, false);
                 break;
             case _NAV:

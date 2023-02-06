@@ -529,7 +529,6 @@ void oled_write_pixel(uint8_t x, uint8_t y, bool on) {
 // place a byte starting at a specific pixel
 // 0,0 is top-left corner
 void oled_write_byte_at_pixel(uint8_t data, uint8_t x, uint8_t y, bool invert) {
-    // TODO: remove powers + add bit manipulation ()
     int i;
     bool isOn;
     for (i = 0; i <= 7 ; i++) {
@@ -564,6 +563,24 @@ void oled_write_raw_P(const char *data, uint16_t size) {
         oled_dirty |= ((OLED_BLOCK_TYPE)1 << (i / OLED_BLOCK_SIZE));
     }
 }
+
+void oled_write_raw_sized(const char *data, int col, int row, int width, int height, bool invert) {
+    const int len = width * height / 8;
+    int i;
+    for(i = 0; i < len; i++) {
+        uint8_t c = pgm_read_byte(data++);
+        oled_write_byte_at_pixel(c, col + (i % width), (row + (8 * (i / width))), invert);
+    };
+};
+
+void oled_fill_section(uint8_t data, int col, int row, int width, int height, bool invert) {
+    const int len = width * height / 8;
+    int i;
+    for(i = 0; i < len; i++) {
+        oled_write_byte_at_pixel(data, col + (i % width), (row + (8 * (i / width))), invert);
+    };
+};
+
 #endif // defined(__AVR__)
 
 bool oled_on(void) {
