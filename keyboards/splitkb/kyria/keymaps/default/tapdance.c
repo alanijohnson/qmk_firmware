@@ -2,6 +2,7 @@
 #define TAPDANCE 
 
 #include "enums.c"
+#include <print.h>
 #define ONESHOT_TIMEOUT 200  /* Time (in ms) before the one shot key is released */
 
 bool isOneShot = false;
@@ -160,23 +161,28 @@ void layer_finished(qk_tap_dance_state_t *state, void *user_data) {
     td_layer_tap_t *data = (td_layer_tap_t *)user_data;
     int layer = data->layer;
     // int current_layer = get_highest_layer(layer_state);
+    print("finished\n");
+    // uprintf("layer: %d\n", layer);
 
     
     xtap_state.state = cur_dance(state);
     switch (xtap_state.state) {
         case TD_SINGLE_TAP: { 
-            // one shot layer, if layer is locked clear
-            if (isOneShot) {
-                reset_oneshot_layer();
-            } else {
-                set_oneshot_layer(layer, ONESHOT_START);
-            }
+            // uprintf("finish start - oneshot layer %d\n", get_oneshot_layer());
+            // uprintf("finish start - layer active %d\n", layer_state_is(layer));
+            // if (layer_state_is(layer)) {
+            //     layer_off(layer);
+            // }
+
             
+            // uprintf("finish end - oneshot layer %d\n", get_oneshot_layer());
+            // uprintf("finish end - layer active %d\n", layer_state_is(layer));
+            // set_oneshot_layer(layer, ONESHOT_START);
             break;
         }   
         case TD_SINGLE_HOLD: { // set layer until release
             isOneShot = false;
-            reset_oneshot_layer();
+            // reset_oneshot_layer();
             layer_move(layer); 
             break; 
         } 
@@ -203,15 +209,42 @@ void layer_finished(qk_tap_dance_state_t *state, void *user_data) {
 void layer_reset(qk_tap_dance_state_t *state, void *user_data) {
     td_layer_tap_t *data = (td_layer_tap_t *)user_data;
     int layer = data->layer;
+    print("reset\n");
     switch (xtap_state.state) {
         case TD_SINGLE_TAP: {
-            clear_oneshot_layer_state(ONESHOT_PRESSED);
+            uprintf("reset start - oneshot layer %d\n", get_oneshot_layer());
+            uprintf("reset start - layer active %d\n", layer_state_is(layer));
+
+            if(get_oneshot_layer() == layer || layer_state_is(layer)) { 
+                if(get_oneshot_layer() == layer) {
+                    print("reset os\n");
+                    reset_oneshot_layer();
+                }
+
+                if(layer_state_is(layer)) {
+                    print("layer off\n");
+                    layer_off(layer);
+                }
+            } else {
+                // turn on one shot
+                print("turn on os\n");
+                set_oneshot_layer(layer, ONESHOT_START);
+                wait_ms(2);
+                clear_oneshot_layer_state(ONESHOT_PRESSED);
+            }
+
+            uprintf("reset 1 - oneshot layer %d\n", get_oneshot_layer());
+            uprintf("reset 1 - layer active %d\n", layer_state_is(layer));
+
+            
+
+            
             isOneShot = true;
             break;
         }
         case TD_SINGLE_HOLD: layer_off(layer); break;
         // case TD_DOUBLE_TAP: unregister_code(KC_D); break;
-        case TD_DOUBLE_SINGLE_TAP: unregister_code(KC_X); break;
+        // case TD_DOUBLE_SINGLE_TAP: unregister_code(KC_X); break;
         default: {break;}
     }
     xtap_state.state = TD_NONE;
@@ -228,6 +261,39 @@ qk_tap_dance_action_t tap_dance_actions[] = {
     [CAPS_WDLK] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, caps_finished, caps_reset),
     [CPY_PST_TD] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, cpy_pst_finished, cpy_pst_reset),
     [DAILY_TD] = LAYER_TAP_DANCE(_DAILY),
+    [NAV_TD] = LAYER_TAP_DANCE(_NAV),
+    [SYMBOL_TD] = LAYER_TAP_DANCE(_SYM),
+    [FUNCTION_TD] = LAYER_TAP_DANCE(_FUNCTION),
 };
+
+int getLayerFromTd(uint16_t keycode) {
+    switch(keycode) {
+        case TD(DAILY_TD):
+            return _DAILY;
+        case TD(NAV_TD):
+            return _NAV;
+        case TD(SYMBOL_TD):
+            return _SYM;
+        case TD(FUNCTION_TD):
+            return _FUNCTION;
+        default:
+            return -1;
+    }
+}
+
+int getTDIndexFromKeycode(uint16_t keycode) {
+    switch(keycode) {
+        case TD(DAILY_TD):
+            return DAILY_TD;
+        case TD(NAV_TD):
+            return NAV_TD;
+        case TD(SYMBOL_TD):
+            return SYMBOL_TD;
+        case TD(FUNCTION_TD):
+            return FUNCTION_TD;
+        default:
+            return -1;
+    }
+}
 
 #endif /* TAPDANCE */ 

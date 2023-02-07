@@ -49,6 +49,7 @@
 #include "oled_constants.c"
 #include "layers.c"
 #include "enums.c"
+#include <process_tap_dance.h>
 
 
 #define softwareVersion "1.0.0"
@@ -105,16 +106,16 @@ bool oled_task_user(void) {
                 // fill_section(255, 20, 76, 24, 24, false);
                 break;
             case _NAV:
-                oled_write_raw_sized(nav24x24, 74, 32, 24, 24, isOneShot);
+                oled_write_raw_sized(nav24x24, 74, 32, 24, 24, get_oneshot_layer() == _NAV);
                 break;
             case _SYM:
-                oled_write_raw_sized(symbol24x24, 74, 32, 24, 24, isOneShot);
+                oled_write_raw_sized(symbol24x24, 74, 32, 24, 24, get_oneshot_layer() == _SYM);
                 break;
             case _FUNCTION:
-                oled_write_raw_sized(fn24x24, 74, 32, 24, 24, isOneShot);
+                oled_write_raw_sized(fn24x24, 74, 32, 24, 24, get_oneshot_layer() == _FUNCTION);
                 break;
             case _DAILY:
-                oled_write_raw_sized(shortcuts24x24, 74, 32, 24, 24, isOneShot);
+                oled_write_raw_sized(shortcuts24x24, 74, 32, 24, 24, get_oneshot_layer() == _DAILY);
                 break;
         }
     
@@ -129,6 +130,7 @@ bool oled_task_user(void) {
 
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    // qk_tap_dance_action_t *action;
     switch (keycode) {
         case ARROW:
             if (record->event.pressed) {
@@ -164,11 +166,41 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 }
             }
             break;
+        case TD(DAILY_TD):
+        case TD(FUNCTION_TD):
+        case TD(SYMBOL_TD):
+        case TD(NAV_TD):
+            print("process user record\n");
+            // action = &tap_dance_actions[getTDIndexFromKeycode(keycode)];
+            // // td_layer_tap_t *data = (td_layer_tap_t *) action->user_data;
+            // // uprintf("layer from action: %d\n", data->layer);
+
+            // if (cur_dance(&action->state)) {
+            //     // tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
+            //     // tap_code16(tap_hold->tap);
+            //     uprintf("state->count: %d\n", action->state.count);
+            //     print("button finished single tap\n");
+            // }
+
+            
+            if (get_oneshot_layer() == getLayerFromTd(keycode)) {
+                set_oneshot_layer(getLayerFromTd(keycode), ONESHOT_PRESSED);
+                uprintf("get_oneshot_layer(): %d\n", get_oneshot_layer());
+                // return false;
+            }
+
+
+            // print("returning true\n");
+            return true;
     }
     return true;
 };
 
-
-
+// void post_process_record_user(uint16_t keycode, keyrecord_t *record) {
+//   switch (keycode) {
+//     case TD(DAILY_TD):
+//         print("post process\n");
+//   }
+// }
 
 

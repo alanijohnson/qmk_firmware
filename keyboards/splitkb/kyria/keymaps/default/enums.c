@@ -14,6 +14,9 @@ enum {
     CAPS_WDLK,
     CPY_PST_TD,
     DAILY_TD,
+    NAV_TD,
+    FUNCTION_TD,
+    SYMBOL_TD,
 };
 
 enum layers {

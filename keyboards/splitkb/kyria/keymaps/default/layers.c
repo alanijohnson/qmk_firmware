@@ -50,13 +50,13 @@
 KC_TAB  , KC_Q ,  KC_W   ,  KC_E  ,   KC_R ,   KC_T ,                                        KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , TD(DAILY_TD), \
 CTL_ESC , KC_A ,  KC_S   ,  KC_D  ,   KC_F ,   KC_G ,                                        KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT, \
     KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , TD(CAPS_WDLK), DAILY,        KC_CAPS  , TD(CPY_PST_TD), KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT, \
-                            FKEYS , KC_LGUI, ALT_ENT, KC_BSPC , NAV   ,     SYM   , KC_SPC ,KC_RALT, KC_RGUI, DAILY
+                            TD(FUNCTION_TD) , KC_LGUI, ALT_ENT, KC_BSPC , NAV   ,     TD(SYMBOL_TD)   , KC_SPC ,KC_RALT, KC_RGUI, DAILY
 
 
 /*
 * Nav Layer: Media, navigation
 *
-* ,-------------------------------------------.                              ,-------------------------------------------.b
+* ,-------------------------------------------.                              ,-------------------------------------------.b56
 * |        |      |      |      |      |      |                              | PgUp | Home |   ↑  | End  | VolUp| Delete |
 * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
 * |        |  GUI |  Alt | Ctrl | Shift|      |                              | PgDn |  ←   |   ↓  |   →  | VolDn| Insert |
