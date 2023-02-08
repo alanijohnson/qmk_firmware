@@ -115,14 +115,32 @@ void x_reset(qk_tap_dance_state_t *state, void *user_data) {
 }
 
 void caps_finished(qk_tap_dance_state_t *state, void *user_data) {
+    led_t led_usb_state = host_keyboard_led_state();
     xtap_state.state = cur_dance(state);
     switch (xtap_state.state) {
-        case TD_SINGLE_TAP: caps_word_toggle(); break;
-        case TD_DOUBLE_TAP: register_code(KC_CAPS); break;
+        case TD_SINGLE_TAP: {
+            if (led_usb_state.caps_lock) {
+                tap_code(KC_CAPS);
+            }
+            caps_word_toggle(); 
+            break;
+        }
+        case TD_SINGLE_HOLD: {
+            register_code(KC_RCTL);
+            register_code(KC_RSFT);
+            register_code(KC_ROPT);
+            register_code(KC_RGUI);
+            break;
+        }
+        case TD_DOUBLE_TAP: {
+            caps_word_off();
+            tap_code(KC_CAPS); 
+            break;
+        }
         // Last case is for fast typing. Assuming your key is `f`:
         // For example, when typing the word `buffer`, and you want to make sure that you send `ff` and not `Esc`.
         // In order to type `ff` when typing fast, the next character will have to be hit within the `TAPPING_TERM`, which by default is 200ms.
-        case TD_DOUBLE_SINGLE_TAP: tap_code(KC_X); register_code(KC_X); break;
+        // case TD_DOUBLE_SINGLE_TAP: tap_code(KC_X); register_code(KC_X); break;
         default: break;
     }
 }
@@ -130,6 +148,13 @@ void caps_finished(qk_tap_dance_state_t *state, void *user_data) {
 void caps_reset(qk_tap_dance_state_t *state, void *user_data) {
     switch (xtap_state.state) {
         case TD_DOUBLE_TAP: unregister_code(KC_CAPS); break;
+        case TD_SINGLE_HOLD: {
+            unregister_code(KC_RCTL);
+            unregister_code(KC_RSFT);
+            unregister_code(KC_ROPT);
+            unregister_code(KC_RGUI);
+            break;
+        }
         default: break;
     }
     xtap_state.state = TD_NONE;
@@ -212,7 +237,7 @@ void layer_reset(qk_tap_dance_state_t *state, void *user_data) {
                 }
 
                 layer_clear();
-                
+
             } else {
                 // turn on one shot
                 uprintf("turn on os (%d)\n", layer);
