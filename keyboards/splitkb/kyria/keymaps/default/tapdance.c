@@ -181,27 +181,32 @@ void layer_finished(qk_tap_dance_state_t *state, void *user_data) {
             break;
         }   
         case TD_SINGLE_HOLD: { // set layer until release
-            isOneShot = false;
-            // reset_oneshot_layer();
             layer_move(layer); 
             break; 
         } 
         case TD_DOUBLE_TAP: { // lock layer toggle. Turns off any existing layers
-            isOneShot = false;
-            reset_oneshot_layer();
-            if (layer_state_is(layer) && locked_layer) {
-                locked_layer = false;
+            uprintf("finish double - oneshot layer %d\n", get_oneshot_layer());
+            uprintf("finish double - layer active %d\n", layer_state_is(layer));
+
+            // one shot layer is active. Restore state so button can function as lock
+            if (get_oneshot_layer() == layer) {
+                print("resetting oneshot + turning off layer\n");
+                reset_oneshot_layer();
+                layer_off(layer);
+            }
+
+            if (layer_state_is(layer)) {
+                print("turning off layer\n");
                 layer_off(layer);
             } else {
-                locked_layer = true;
-                layer_move(layer);
-            }	
-            break;
+                print("turning on layer\n");
+                layer_on(layer);
+            }
         } // lock layer, if layer is locked clear
         // Last case is for fast typing. Assuming your key is `f`:
         // For example, when typing the word `buffer`, and you want to make sure that you send `ff` and not `Esc`.
         // In order to type `ff` when typing fast, the next character will have to be hit within the `TAPPING_TERM`, which by default is 200ms.
-        case TD_DOUBLE_SINGLE_TAP: tap_code(KC_X); register_code(KC_X); break;
+        // case TD_DOUBLE_SINGLE_TAP: tap_code(KC_X); register_code(KC_X); break;
         default: break;
     }
 }
