@@ -160,27 +160,11 @@ void cpy_pst_reset(qk_tap_dance_state_t *state, void *user_data) {
 void layer_finished(qk_tap_dance_state_t *state, void *user_data) {
     td_layer_tap_t *data = (td_layer_tap_t *)user_data;
     int layer = data->layer;
-    // int current_layer = get_highest_layer(layer_state);
-    print("finished\n");
-    // uprintf("layer: %d\n", layer);
 
-    
     xtap_state.state = cur_dance(state);
     switch (xtap_state.state) {
-        case TD_SINGLE_TAP: { 
-            // uprintf("finish start - oneshot layer %d\n", get_oneshot_layer());
-            // uprintf("finish start - layer active %d\n", layer_state_is(layer));
-            // if (layer_state_is(layer)) {
-            //     layer_off(layer);
-            // }
-
-            
-            // uprintf("finish end - oneshot layer %d\n", get_oneshot_layer());
-            // uprintf("finish end - layer active %d\n", layer_state_is(layer));
-            // set_oneshot_layer(layer, ONESHOT_START);
-            break;
-        }   
         case TD_SINGLE_HOLD: { // set layer until release
+            layer_clear();
             layer_move(layer); 
             break; 
         } 
@@ -189,24 +173,24 @@ void layer_finished(qk_tap_dance_state_t *state, void *user_data) {
             uprintf("finish double - layer active %d\n", layer_state_is(layer));
 
             // one shot layer is active. Restore state so button can function as lock
-            if (get_oneshot_layer() == layer) {
+            if (get_oneshot_layer() != 0) {
                 print("resetting oneshot + turning off layer\n");
                 reset_oneshot_layer();
-                layer_off(layer);
+                // layer_off(layer);
+                layer_clear();
             }
 
             if (layer_state_is(layer)) {
                 print("turning off layer\n");
-                layer_off(layer);
+                // layer_off(layer);
+                layer_clear();
             } else {
                 print("turning on layer\n");
+                layer_clear();
                 layer_on(layer);
             }
-        } // lock layer, if layer is locked clear
-        // Last case is for fast typing. Assuming your key is `f`:
-        // For example, when typing the word `buffer`, and you want to make sure that you send `ff` and not `Esc`.
-        // In order to type `ff` when typing fast, the next character will have to be hit within the `TAPPING_TERM`, which by default is 200ms.
-        // case TD_DOUBLE_SINGLE_TAP: tap_code(KC_X); register_code(KC_X); break;
+            break;
+        } 
         default: break;
     }
 }
@@ -214,37 +198,32 @@ void layer_finished(qk_tap_dance_state_t *state, void *user_data) {
 void layer_reset(qk_tap_dance_state_t *state, void *user_data) {
     td_layer_tap_t *data = (td_layer_tap_t *)user_data;
     int layer = data->layer;
-    print("reset\n");
+
     switch (xtap_state.state) {
         case TD_SINGLE_TAP: {
-            uprintf("reset start - oneshot layer %d\n", get_oneshot_layer());
-            uprintf("reset start - layer active %d\n", layer_state_is(layer));
-
+            uprintf("reset single - oneshot layer %d\n", get_oneshot_layer());
+            uprintf("reset single - layer active %d\n", layer_state_is(layer));
+            
+            // reset oneshot layer on single tap
             if(get_oneshot_layer() == layer || layer_state_is(layer)) { 
-                if(get_oneshot_layer() == layer) {
-                    print("reset os\n");
+                if(get_oneshot_layer() != 0) {
+                    uprintf("reset os (%d)\n", get_oneshot_layer());
                     reset_oneshot_layer();
                 }
 
-                if(layer_state_is(layer)) {
-                    print("layer off\n");
-                    layer_off(layer);
-                }
+                layer_clear();
+
+                // if(layer_state_is(layer)) {
+                //     uprintf("layer (%d) off\n", layer);
+                //     layer_off(layer);
+                // }
             } else {
                 // turn on one shot
-                print("turn on os\n");
+                uprintf("turn on os (%d)\n", layer);
+                layer_clear();
                 set_oneshot_layer(layer, ONESHOT_START);
-                wait_ms(2);
                 clear_oneshot_layer_state(ONESHOT_PRESSED);
             }
-
-            uprintf("reset 1 - oneshot layer %d\n", get_oneshot_layer());
-            uprintf("reset 1 - layer active %d\n", layer_state_is(layer));
-
-            
-
-            
-            isOneShot = true;
             break;
         }
         case TD_SINGLE_HOLD: layer_off(layer); break;
