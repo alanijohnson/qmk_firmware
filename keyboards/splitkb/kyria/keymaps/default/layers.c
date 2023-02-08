@@ -7,17 +7,20 @@
 
 
 // Aliases for readability
-#define QWERTY   DF(_QWERTY)
-#define COLEMAK  DF(_COLEMAK_DH)
-#define DVORAK   DF(_DVORAK)
+#define QWERTY    DF(_QWERTY)
+#define COLEMAK   DF(_COLEMAK_DH)
+#define DVORAK    DF(_DVORAK)
 
-#define SYM      MO(_SYM)
-#define NAV      MO(_NAV)
-#define FKEYS    MO(_FUNCTION)
+#define SYM      TD(SYMBOL_TD)
+#define NAV      TD(NAV_TD)
+#define FKEYS    TD(FUNCTION_TD)
 #define ADJUST   MO(_ADJUST)
-#define DAILY    MO(_DAILY)
+#define DAILY    TD(DAILY_TD)
 #define DAILYOS  OSL(_DAILY)
 #define IDE      MO(_IDE)
+
+#define CWRD_HYP TD(CAPS_WDLK)
+#define CPYPST   TD(CPY_PST_TD)
 
 #define CTL_ESC  MT(MOD_LCTL, KC_ESC)
 #define CTL_QUOT MT(MOD_RCTL, KC_QUOTE)
@@ -31,26 +34,27 @@
 #define NEXT_APP G(KC_TAB)
 #define PREV_WINDOW LSA(KC_TILD)
 #define NEXT_WINDOW A(KC_TILD)
+#define TOGGLE_MIC A(KC_TILD)
 
 
 /*
 *
-* ,-------------------------------------------.                              ,-------------------------------------------.
-* |  Tab   |   Q  |   W  |   E  |   R  |   T  |                              |   Y  |   U  |   I  |   O  |   P  | CP/PST |
-* |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
-* |Ctrl/Esc|   A  |   S  |   D  |   F  |   G  |                              |   H  |   J  |   K  |   L  | ;  : |Ctrl/' "|
-* |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
-* | LShift |   Z  |   X  |   C  |   V  |   B  | [ {  |CapsLk|  |F-keys|  ] } |   N  |   M  | ,  < | . >  | /  ? | RShift |
-* `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
-*                        |Adjust| LCMD | LAlt/| Space| Nav  |  | Sym  | Space| AltGr| RCMD | Menu |
-*                        |      |      | Enter|      |      |  |      |      |      |      |      |
-*                        `----------------------------------'  `----------------------------------'
+* ,-------------------------------------------.                              ,--------------------------------------------.
+* |  Tab   |   Q  |   W  |   E  |   R  |   T  |                              |   Y  |   U   |   I  |   O  |   P  |  DAILY |
+* |--------+------+------+------+------+------|                              |------+-------+------+------+------+--------|
+* |Ctrl/Esc|   A  |   S  |   D  |   F  |   G  |                              |   H  |   J   |   K  |   L  | ;  : |Ctrl/' "|
+* |--------+------+------+------+------+------+-------------.  ,-------------+------+-------+------+------+------+--------|
+* | LShift |   Z  |   X  |   C  |   V  |   B  | [ {  |CapsLk|  |F-keys|  ] } |   N  |   M   | ,  < | . >  | /  ? | RShift |
+* `----------------------+------+------+------+------+------|  |------+------+------+-------+------+----------------------'
+*                        |  FN  | LCMD | LAlt/| Space| Nav  |  | Sym  | Space| AltGr| CWRD/ | CPY/ |
+*                        |  LAY |      | Enter|      |      |  |      |      |      | HYPER | PST  |
+*                        `----------------------------------'  `-----------------------------------'
 */
 #define qwerty_layout \
-KC_TAB  , KC_Q ,  KC_W   ,  KC_E  ,   KC_R ,   KC_T ,                                        KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , TD(DAILY_TD), \
+KC_TAB  , KC_Q ,  KC_W   ,  KC_E  ,   KC_R ,   KC_T ,                                        KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , DAILY, \
 CTL_ESC , KC_A ,  KC_S   ,  KC_D  ,   KC_F ,   KC_G ,                                        KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT, \
-    KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , TD(CAPS_WDLK), DAILY,        KC_CAPS  , TD(CPY_PST_TD), KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT, \
-                            TD(FUNCTION_TD) , KC_LGUI, ALT_ENT, KC_BSPC , NAV   ,     TD(SYMBOL_TD)   , KC_SPC ,KC_RALT, KC_RGUI, DAILY
+KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B ,  NAV   , NAV,        KC_ROPT, KC_RCTL, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT, \
+                           FKEYS  ,  KC_DEL, KC_BSPC, KC_ENT , SYM,        KC_RGUI, KC_SPC ,KC_RALT, CPYPST, CWRD_HYP
 
 
 /*
@@ -84,7 +88,7 @@ CTL_ESC , KC_A ,  KC_S   ,  KC_D  ,   KC_F ,   KC_G ,                           
     _______, _______, _______, _______, _______, _______,                                  KC_PGUP, KC_HOME, KC_END,   KC_PGUP,  KC_PGDN, _______, \
     _______, KC_LSFT, KC_LCTL, KC_LOPT, KC_LGUI, UNDO,                                     KC_PGDN, KC_LEFT, KC_RGHT, KC_UP, KC_DOWN, SCREEN_CAPTURE, \
     _______, KC_VOLU, KC_VOLD, KC_MUTE, _______, REDO, _______, _______, _______, _______,XXXXXXX, PREV_APP, NEXT_APP, PREV_WINDOW, NEXT_WINDOW, SCREEN_TO_CLIPBOARD, \
-                                _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
+                            _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
 
 
 /*

@@ -212,11 +212,7 @@ void layer_reset(qk_tap_dance_state_t *state, void *user_data) {
                 }
 
                 layer_clear();
-
-                // if(layer_state_is(layer)) {
-                //     uprintf("layer (%d) off\n", layer);
-                //     layer_off(layer);
-                // }
+                
             } else {
                 // turn on one shot
                 uprintf("turn on os (%d)\n", layer);

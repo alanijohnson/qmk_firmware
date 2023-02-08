@@ -130,7 +130,7 @@ bool oled_task_user(void) {
 
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    // qk_tap_dance_action_t *action;
+    qk_tap_dance_action_t *action;
     switch (keycode) {
         case ARROW:
             if (record->event.pressed) {
@@ -171,8 +171,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case TD(SYMBOL_TD):
         case TD(NAV_TD):
             print("process user record\n");
-            // action = &tap_dance_actions[getTDIndexFromKeycode(keycode)];
-            // // td_layer_tap_t *data = (td_layer_tap_t *) action->user_data;
+            action = &tap_dance_actions[getTDIndexFromKeycode(keycode)];
+            td_layer_tap_t *data = (td_layer_tap_t *) action->user_data;
             // // uprintf("layer from action: %d\n", data->layer);
 
             // if (cur_dance(&action->state)) {
@@ -182,10 +182,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             //     print("button finished single tap\n");
             // }
 
-            
-            if (get_oneshot_layer() == getLayerFromTd(keycode)) {
-                set_oneshot_layer(getLayerFromTd(keycode), ONESHOT_PRESSED);
-                uprintf("get_oneshot_layer(): %d\n", get_oneshot_layer());
+            uprintf("process user record - get_oneshot_layer(): %d\n", get_oneshot_layer());
+            uprintf("process user record - layer: %d\n", data->layer);
+            if (get_oneshot_layer() == data->layer) {
+                print("process user record - set one shot to pressed\n");
+                set_oneshot_layer(data->layer, ONESHOT_PRESSED);
                 // return false;
             }
 
