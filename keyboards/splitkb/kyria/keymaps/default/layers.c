@@ -34,7 +34,8 @@
 #define NEXT_APP G(KC_TAB)
 #define PREV_WINDOW LSA(KC_TILD)
 #define NEXT_WINDOW A(KC_TILD)
-#define TOGGLE_MIC A(KC_TILD)
+#define BRACES TD(BRACES_TD)
+#define QUICK TD(QUICK_ACCESS_TD)
 
 
 /*
@@ -51,10 +52,10 @@
 *                        `----------------------------------'  `-----------------------------------'
 */
 #define qwerty_layout \
-KC_TAB  , KC_Q ,  KC_W   ,  KC_E  ,   KC_R ,   KC_T ,                                        KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , DAILY, \
-CTL_ESC , KC_A ,  KC_S   ,  KC_D  ,   KC_F ,   KC_G ,                                        KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT, \
-KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B ,  NAV   , NAV,        KC_ROPT, KC_RCTL, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT, \
-                           FKEYS  ,  KC_DEL, KC_BSPC, KC_ENT , SYM,        KC_RGUI, KC_SPC ,KC_RALT, CPYPST, CWRD_HYP
+KC_TAB  , KC_Q ,  KC_W   ,  KC_E  ,   KC_R ,   KC_T ,                                        KC_Y ,  KC_U ,  KC_I ,   KC_O ,  KC_P , DAILY, \
+CTL_ESC , KC_A ,  KC_S   ,  KC_D  ,   KC_F ,   KC_G ,                                        KC_H ,  KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT, \
+KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , BRACES , NAV,        KC_ROPT, KC_RCTL, KC_N ,  KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT, \
+                           FKEYS  ,  KC_DEL, KC_BSPC, KC_ENT , SYM,        KC_RGUI, KC_SPC , QUICK, CPYPST, CWRD_HYP
 
 
 /*

@@ -255,8 +255,108 @@ void layer_reset(qk_tap_dance_state_t *state, void *user_data) {
     xtap_state.state = TD_NONE;
 }
 
-#define layer_tapdance(td_layer) (layer = td_layer; return ACTION_TAP_DANCE_FN_ADVANCED(NULL, layer_finished, layer_reset))
+void braces_finished(qk_tap_dance_state_t *state, void *user_data) {
+    bool leftShiftPressed = get_mods() & MOD_BIT(KC_LSFT);
+    bool rightShiftPressed = get_mods() & MOD_BIT(KC_RSFT);
+    bool shift_pressed_braces = leftShiftPressed || rightShiftPressed;
+    // uprintf("starting state %d\n", mod_state_braces & MOD_MASK_SHIFT);
+    xtap_state.state = cur_dance(state);
+    switch (xtap_state.state) {
+        case TD_SINGLE_TAP: {
+            if (shift_pressed_braces) {
+                register_code16(KC_RPRN);
+            } else {
+                register_code16(KC_LPRN);
+            }
+            break;
+        }
+        case TD_DOUBLE_TAP: {
+            if (shift_pressed_braces) {
+                register_code16(KC_RCBR);
+            } else {
+                register_code16(KC_LCBR);
+            }
+            break;
+        }
+        case TD_TRIPLE_TAP:
+            if (shift_pressed_braces) {
+                unregister_weak_mods(state->weak_mods);
+                unregister_mods(MOD_MASK_SHIFT);
+                tap_code16(KC_RBRC);
+                if (leftShiftPressed) {
+                    register_mods(MOD_BIT(KC_LSFT));
+                }
 
+                if (rightShiftPressed) {
+                    register_mods(MOD_BIT(KC_RSFT));
+                }
+            } else {
+                register_code16(KC_LBRC);
+            }
+            break;
+        default: break;
+    }
+}
+
+void braces_reset(qk_tap_dance_state_t *state, void *user_data) {
+    bool leftShiftPressed = get_mods() & MOD_BIT(KC_LSFT);
+    bool rightShiftPressed = get_mods() & MOD_BIT(KC_RSFT);
+    bool shift_pressed_braces = leftShiftPressed || rightShiftPressed;
+    switch (xtap_state.state) {
+        case TD_SINGLE_TAP: {
+            if (shift_pressed_braces) {
+                unregister_code16(KC_RPRN);
+            } else {
+                unregister_code16(KC_LPRN);
+            }
+            break;
+        }
+        case TD_DOUBLE_TAP: {
+            if (shift_pressed_braces) {
+                unregister_code16(KC_RCBR);
+            } else {
+                unregister_code16(KC_LCBR);
+            }
+            break;
+        }
+        case TD_TRIPLE_TAP:
+            if (!shift_pressed_braces) {
+                // unregister_code16(KC_RBRC);
+                print("released\n");
+                unregister_code16(KC_LBRC);
+            } 
+            break;
+        default: break;
+    }
+    xtap_state.state = TD_NONE;
+}
+
+void quickaccess_finished(qk_tap_dance_state_t *state, void *user_data) {
+    xtap_state.state = cur_dance(state);
+    switch (xtap_state.state) {
+        case TD_SINGLE_TAP: register_code(KC_X); break;
+        case TD_SINGLE_HOLD: register_code(KC_LCTL); break;
+        case TD_DOUBLE_TAP: register_code(KC_ESC); break;
+        case TD_DOUBLE_HOLD: register_code(KC_LALT); break;
+        // Last case is for fast typing. Assuming your key is `f`:
+        // For example, when typing the word `buffer`, and you want to make sure that you send `ff` and not `Esc`.
+        // In order to type `ff` when typing fast, the next character will have to be hit within the `TAPPING_TERM`, which by default is 200ms.
+        case TD_DOUBLE_SINGLE_TAP: tap_code(KC_X); register_code(KC_X); break;
+        default: break;
+    }
+}
+
+void quickaccess_reset(qk_tap_dance_state_t *state, void *user_data) {
+    switch (xtap_state.state) {
+        case TD_SINGLE_TAP: unregister_code(KC_X); break;
+        case TD_SINGLE_HOLD: unregister_code(KC_LCTL); break;
+        case TD_DOUBLE_TAP: unregister_code(KC_ESC); break;
+        case TD_DOUBLE_HOLD: unregister_code(KC_LALT); break;
+        case TD_DOUBLE_SINGLE_TAP: unregister_code(KC_X); break;
+        default: break;
+    }
+    xtap_state.state = TD_NONE;
+}
 
 #define LAYER_TAP_DANCE(td_layer) \
     { .fn = {NULL, layer_finished, layer_reset}, .user_data = (void *)&((td_layer_tap_t){td_layer}), }
@@ -269,6 +369,8 @@ qk_tap_dance_action_t tap_dance_actions[] = {
     [NAV_TD] = LAYER_TAP_DANCE(_NAV),
     [SYMBOL_TD] = LAYER_TAP_DANCE(_SYM),
     [FUNCTION_TD] = LAYER_TAP_DANCE(_FUNCTION),
+    [QUICK_ACCESS_TD] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, quickaccess_finished, quickaccess_reset),
+    [BRACES_TD] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, braces_finished, braces_reset),
 };
 
 int getLayerFromTd(uint16_t keycode) {

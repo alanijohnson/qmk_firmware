@@ -17,6 +17,8 @@ enum {
     NAV_TD,
     FUNCTION_TD,
     SYMBOL_TD,
+    QUICK_ACCESS_TD,
+    BRACES_TD
 };
 
 enum layers {
