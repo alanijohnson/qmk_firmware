@@ -2,11 +2,10 @@
 #define TAPDANCE 
 
 #include "enums.c"
-#include <print.h>
-#define ONESHOT_TIMEOUT 200  /* Time (in ms) before the one shot key is released */
-
-bool isOneShot = false;
-bool locked_layer = false;
+// #include <print.h>
+#define MUTE  HYPR(KC_M)
+#define SCREEN_TO_CLIPBOARD SGUI(KC_3)
+#define SCREEN_CAPTURE SGUI(KC_5)
 
 typedef enum {
     TD_NONE,
@@ -87,33 +86,6 @@ static td_tap_t xtap_state = {
     .state = TD_NONE
 };
 
-void x_finished(qk_tap_dance_state_t *state, void *user_data) {
-    xtap_state.state = cur_dance(state);
-    switch (xtap_state.state) {
-        case TD_SINGLE_TAP: register_code(KC_X); break;
-        case TD_SINGLE_HOLD: register_code(KC_LCTL); break;
-        case TD_DOUBLE_TAP: register_code(KC_ESC); break;
-        case TD_DOUBLE_HOLD: register_code(KC_LALT); break;
-        // Last case is for fast typing. Assuming your key is `f`:
-        // For example, when typing the word `buffer`, and you want to make sure that you send `ff` and not `Esc`.
-        // In order to type `ff` when typing fast, the next character will have to be hit within the `TAPPING_TERM`, which by default is 200ms.
-        case TD_DOUBLE_SINGLE_TAP: tap_code(KC_X); register_code(KC_X); break;
-        default: break;
-    }
-}
-
-void x_reset(qk_tap_dance_state_t *state, void *user_data) {
-    switch (xtap_state.state) {
-        case TD_SINGLE_TAP: unregister_code(KC_X); break;
-        case TD_SINGLE_HOLD: unregister_code(KC_LCTL); break;
-        case TD_DOUBLE_TAP: unregister_code(KC_ESC); break;
-        case TD_DOUBLE_HOLD: unregister_code(KC_LALT); break;
-        case TD_DOUBLE_SINGLE_TAP: unregister_code(KC_X); break;
-        default: break;
-    }
-    xtap_state.state = TD_NONE;
-}
-
 void caps_finished(qk_tap_dance_state_t *state, void *user_data) {
     led_t led_usb_state = host_keyboard_led_state();
     xtap_state.state = cur_dance(state);
@@ -137,10 +109,6 @@ void caps_finished(qk_tap_dance_state_t *state, void *user_data) {
             tap_code(KC_CAPS); 
             break;
         }
-        // Last case is for fast typing. Assuming your key is `f`:
-        // For example, when typing the word `buffer`, and you want to make sure that you send `ff` and not `Esc`.
-        // In order to type `ff` when typing fast, the next character will have to be hit within the `TAPPING_TERM`, which by default is 200ms.
-        // case TD_DOUBLE_SINGLE_TAP: tap_code(KC_X); register_code(KC_X); break;
         default: break;
     }
 }
@@ -194,23 +162,23 @@ void layer_finished(qk_tap_dance_state_t *state, void *user_data) {
             break; 
         } 
         case TD_DOUBLE_TAP: { // lock layer toggle. Turns off any existing layers
-            uprintf("finish double - oneshot layer %d\n", get_oneshot_layer());
-            uprintf("finish double - layer active %d\n", layer_state_is(layer));
+            // uprintf("finish double - oneshot layer %d\n", get_oneshot_layer());
+            // uprintf("finish double - layer active %d\n", layer_state_is(layer));
 
             // one shot layer is active. Restore state so button can function as lock
             if (get_oneshot_layer() != 0) {
-                print("resetting oneshot + turning off layer\n");
+                // print("resetting oneshot + turning off layer\n");
                 reset_oneshot_layer();
                 // layer_off(layer);
                 layer_clear();
             }
 
             if (layer_state_is(layer)) {
-                print("turning off layer\n");
+                // print("turning off layer\n");
                 // layer_off(layer);
                 layer_clear();
             } else {
-                print("turning on layer\n");
+                // print("turning on layer\n");
                 layer_clear();
                 layer_on(layer);
             }
@@ -226,13 +194,13 @@ void layer_reset(qk_tap_dance_state_t *state, void *user_data) {
 
     switch (xtap_state.state) {
         case TD_SINGLE_TAP: {
-            uprintf("reset single - oneshot layer %d\n", get_oneshot_layer());
-            uprintf("reset single - layer active %d\n", layer_state_is(layer));
+            // uprintf("reset single - oneshot layer %d\n", get_oneshot_layer());
+            // uprintf("reset single - layer active %d\n", layer_state_is(layer));
             
             // reset oneshot layer on single tap
             if(get_oneshot_layer() == layer || layer_state_is(layer)) { 
                 if(get_oneshot_layer() != 0) {
-                    uprintf("reset os (%d)\n", get_oneshot_layer());
+                    // uprintf("reset os (%d)\n", get_oneshot_layer());
                     reset_oneshot_layer();
                 }
 
@@ -240,7 +208,7 @@ void layer_reset(qk_tap_dance_state_t *state, void *user_data) {
 
             } else {
                 // turn on one shot
-                uprintf("turn on os (%d)\n", layer);
+                // uprintf("turn on os (%d)\n", layer);
                 layer_clear();
                 set_oneshot_layer(layer, ONESHOT_START);
                 clear_oneshot_layer_state(ONESHOT_PRESSED);
@@ -321,8 +289,7 @@ void braces_reset(qk_tap_dance_state_t *state, void *user_data) {
         }
         case TD_TRIPLE_TAP:
             if (!shift_pressed_braces) {
-                // unregister_code16(KC_RBRC);
-                print("released\n");
+                // print("released\n");
                 unregister_code16(KC_LBRC);
             } 
             break;
@@ -334,25 +301,26 @@ void braces_reset(qk_tap_dance_state_t *state, void *user_data) {
 void quickaccess_finished(qk_tap_dance_state_t *state, void *user_data) {
     xtap_state.state = cur_dance(state);
     switch (xtap_state.state) {
-        case TD_SINGLE_TAP: register_code(KC_X); break;
-        case TD_SINGLE_HOLD: register_code(KC_LCTL); break;
-        case TD_DOUBLE_TAP: register_code(KC_ESC); break;
-        case TD_DOUBLE_HOLD: register_code(KC_LALT); break;
-        // Last case is for fast typing. Assuming your key is `f`:
-        // For example, when typing the word `buffer`, and you want to make sure that you send `ff` and not `Esc`.
-        // In order to type `ff` when typing fast, the next character will have to be hit within the `TAPPING_TERM`, which by default is 200ms.
-        case TD_DOUBLE_SINGLE_TAP: tap_code(KC_X); register_code(KC_X); break;
+        case TD_SINGLE_TAP: register_code16(MUTE); break;
+        case TD_SINGLE_HOLD: 
+            register_code(KC_LCTL); 
+            register_code(KC_LOPT); 
+            break;
+        case TD_DOUBLE_TAP: register_code16(SCREEN_TO_CLIPBOARD); break;
+        case TD_TRIPLE_TAP: register_code16(SCREEN_CAPTURE); break;
         default: break;
     }
 }
 
 void quickaccess_reset(qk_tap_dance_state_t *state, void *user_data) {
     switch (xtap_state.state) {
-        case TD_SINGLE_TAP: unregister_code(KC_X); break;
-        case TD_SINGLE_HOLD: unregister_code(KC_LCTL); break;
-        case TD_DOUBLE_TAP: unregister_code(KC_ESC); break;
-        case TD_DOUBLE_HOLD: unregister_code(KC_LALT); break;
-        case TD_DOUBLE_SINGLE_TAP: unregister_code(KC_X); break;
+        case TD_SINGLE_TAP: unregister_code16(MUTE); break;
+        case TD_SINGLE_HOLD: 
+            unregister_code(KC_LCTL); 
+            unregister_code(KC_LOPT); 
+            break;
+        case TD_DOUBLE_TAP: unregister_code16(SCREEN_TO_CLIPBOARD); break;
+        case TD_TRIPLE_TAP: unregister_code16(SCREEN_CAPTURE); break;
         default: break;
     }
     xtap_state.state = TD_NONE;
@@ -362,7 +330,6 @@ void quickaccess_reset(qk_tap_dance_state_t *state, void *user_data) {
     { .fn = {NULL, layer_finished, layer_reset}, .user_data = (void *)&((td_layer_tap_t){td_layer}), }
 
 qk_tap_dance_action_t tap_dance_actions[] = {
-    [X_CTL] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, x_finished, x_reset),
     [CAPS_WDLK] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, caps_finished, caps_reset),
     [CPY_PST_TD] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, cpy_pst_finished, cpy_pst_reset),
     [DAILY_TD] = LAYER_TAP_DANCE(_DAILY),
@@ -372,6 +339,14 @@ qk_tap_dance_action_t tap_dance_actions[] = {
     [QUICK_ACCESS_TD] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, quickaccess_finished, quickaccess_reset),
     [BRACES_TD] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, braces_finished, braces_reset),
 };
+
+uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        default:
+            return g_tapping_term;
+    }
+}
+
 
 int getLayerFromTd(uint16_t keycode) {
     switch(keycode) {

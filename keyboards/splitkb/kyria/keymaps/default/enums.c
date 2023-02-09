@@ -5,7 +5,8 @@ enum custom_keycodes {
     ELLIPSES = SAFE_RANGE,
     ARROW,
     CPY_PST,
-    HELP,
+e    USER,
+    PASS,
 };
 
 // Tap dance enums

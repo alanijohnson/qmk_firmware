@@ -5,4 +5,5 @@ RGBLIGHT_ENABLE = no      # Enable keyboard RGB underglow
 EXTRAFLAGS += -flto
 CAPS_WORD_ENABLE = yes
 TAP_DANCE_ENABLE = yes
-CONSOLE_ENABLE = yes
+DYNAMIC_TAPPING_TERM_ENABLE = yes
+# CONSOLE_ENABLE = yes

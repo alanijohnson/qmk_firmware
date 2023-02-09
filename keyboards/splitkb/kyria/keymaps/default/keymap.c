@@ -26,6 +26,20 @@
  * v2.1.0 (Feb 5 2023):
  *  -- Refactor files
  *
+ * v3.0.0 (Feb 9 2023):
+ *  -- Added Custom Keys
+ *      - USER - sends string of username
+ *      - PASS - sends string of password
+ *  -- Added Custom Tap dance Keys
+ *      - layers [new]
+ *      - braces [new]
+ *      - quick access [new]
+ *      - caps_word lock is hyper on single tap hold
+ *  -- Update display of layers to invert when in oneshot mode
+ *  -- Implemented Tapping term per key
+ *  -- Implemented Dynamic tapping term 
+ *  -- Finalized first full iteration of layers
+ *
  * Details on derivation below
  * Copyright 2019 Thomas Baart <thomas@splitkb.com>
  *
@@ -50,12 +64,6 @@
 #include "layers.c"
 #include "enums.c"
 #include <process_tap_dance.h>
-
-
-#define softwareVersion "1.0.0"
-
-// #define MISSION_CONTROL
-// #define APP_EXPOSE
 
 // Note: LAlt/Enter (ALT_ENT) is not the same thing as the keyboard shortcut Alt+Enter.
 // The notation `mod/tap` denotes a key that activates the modifier `mod` when held down, and
@@ -132,10 +140,18 @@ bool oled_task_user(void) {
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     qk_tap_dance_action_t *action;
     switch (keycode) {
-        case ARROW:
+        case USER:
             if (record->event.pressed) {
                 // when keycode QMKBEST is pressed
-                SEND_STRING("=>");
+                SEND_STRING("ajohnson");
+            } else {
+                // when keycode QMKBEST is released
+            }
+            break;
+        case PASS:
+            if (record->event.pressed) {
+                // when keycode QMKBEST is pressed
+                SEND_STRING("[password]                                                                     ");
             } else {
                 // when keycode QMKBEST is released
             }
@@ -170,38 +186,22 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case TD(FUNCTION_TD):
         case TD(SYMBOL_TD):
         case TD(NAV_TD):
-            print("process user record\n");
+            // print("process user record\n");
             action = &tap_dance_actions[getTDIndexFromKeycode(keycode)];
             td_layer_tap_t *data = (td_layer_tap_t *) action->user_data;
-            // // uprintf("layer from action: %d\n", data->layer);
 
-            // if (cur_dance(&action->state)) {
-            //     // tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
-            //     // tap_code16(tap_hold->tap);
-            //     uprintf("state->count: %d\n", action->state.count);
-            //     print("button finished single tap\n");
-            // }
-
-            uprintf("process user record - get_oneshot_layer(): %d\n", get_oneshot_layer());
-            uprintf("process user record - layer: %d\n", data->layer);
+            // uprintf("process user record - get_oneshot_layer(): %d\n", get_oneshot_layer());
+            // uprintf("process user record - layer: %d\n", data->layer);
             if (get_oneshot_layer() == data->layer) {
-                print("process user record - set one shot to pressed\n");
+                // print("process user record - set one shot to pressed\n");
                 set_oneshot_layer(data->layer, ONESHOT_PRESSED);
                 // return false;
             }
 
-
-            // print("returning true\n");
             return true;
     }
     return true;
 };
 
-// void post_process_record_user(uint16_t keycode, keyrecord_t *record) {
-//   switch (keycode) {
-//     case TD(DAILY_TD):
-//         print("post process\n");
-//   }
-// }
 
 

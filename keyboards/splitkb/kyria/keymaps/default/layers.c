@@ -36,6 +36,7 @@
 #define NEXT_WINDOW A(KC_TILD)
 #define BRACES TD(BRACES_TD)
 #define QUICK TD(QUICK_ACCESS_TD)
+#define MUTE  HYPR(KC_M)
 
 
 /*
@@ -86,10 +87,10 @@ KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , BRACES , NAV,        KC_RO
 *                        `----------------------------------'  `----------------------------------'
 */
 #define nav_layer \
-    _______, _______, _______, _______, _______, _______,                                  KC_PGUP, KC_HOME, KC_END,   KC_PGUP,  KC_PGDN, _______, \
-    _______, KC_LSFT, KC_LCTL, KC_LOPT, KC_LGUI, UNDO,                                     KC_PGDN, KC_LEFT, KC_RGHT, KC_UP, KC_DOWN, SCREEN_CAPTURE, \
-    _______, KC_VOLU, KC_VOLD, KC_MUTE, _______, REDO, _______, _______, _______, _______,XXXXXXX, PREV_APP, NEXT_APP, PREV_WINDOW, NEXT_WINDOW, SCREEN_TO_CLIPBOARD, \
-                            _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
+    _______, KC_VOLU,  KC_VOLD,   KC_MUTE,     XXXXXXX, XXXXXXX,                                   KC_HOME, KC_HOME, KC_END,   KC_PGUP,  KC_PGDN, _______, \
+    _______, KC_LSFT,  KC_LCTL,   KC_LOPT,     KC_LGUI,   UNDO,                                     KC_END, KC_LEFT, KC_RGHT, KC_UP, KC_DOWN, _______, \
+    _______, PREV_APP, NEXT_APP, PREV_WINDOW, NEXT_WINDOW, REDO, _______, _______, _______, _______,LSA(KC_LEFT), SGUI(KC_LEFT), LSA(KC_RGHT), SGUI(KC_RGHT), _______,_______, \
+                                      _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
 
 
 /*
@@ -150,20 +151,20 @@ KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , BRACES , NAV,        KC_RO
 */
 
 #define function_layer \
-    _______, _______, _______, _______, _______, _______,                                     _______,  KC_F7 ,  KC_F8 ,  KC_F9 , KC_F10 , _______, \
-    _______, KC_LSFT, KC_LCTL, KC_LOPT, KC_LGUI, _______,                                     _______,  KC_F4 ,  KC_F5 ,  KC_F6 , KC_F11 , _______, \
-    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,  KC_F1 ,  KC_F2 ,  KC_F3 , KC_F12 , _______, \
-                                _______, _______, _______, KC_DEL , _______, _______, _______, _______, _______, _______
+    _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                                     XXXXXXX,  KC_F7 ,  KC_F8 ,  KC_F9 , KC_F10 , _______, \
+    _______, KC_LSFT, KC_LCTL, KC_LOPT, KC_LGUI, XXXXXXX,                                     XXXXXXX,  KC_F4 ,  KC_F5 ,  KC_F6 , KC_F11 , XXXXXXX, \
+    _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, _______, _______, _______, _______, XXXXXXX,  KC_F1 ,  KC_F2 ,  KC_F3 , KC_F12 , _______, \
+                                _______, _______, _______, _______ , _______, _______, _______, _______, _______, _______
 
 
 /*
  * DAILY LAYER
  *
  * ,-------------------------------------------.                              ,-------------------------------------------.
- * |        |      |      |      |      |      |                              |      |      |      |      |      |        |
+ * |        |      |      |      |      |      |                              |      |      |      |      | play |        |
  * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
- * |        |      |      |      | Screen   |      |                              |      |      |      |      |      |        |
- * |        |      |      |      | Capture  |      |                              |      |      |      |      |      |        |
+ * |        |      |      |      |      |      |                              |      | CMD  |      |      | skip |        |
+ * |        |      |      |      |      |      |                              |      | SPACE|      |      |      |        |
  * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
  * |        |      |      |      |      |      |      |      |  |      |      |      |      |      |      |      |        |
  * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
@@ -173,9 +174,9 @@ KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , BRACES , NAV,        KC_RO
  */
 
 #define daily_layer \
-    _______, _______, _______, _______, _______, _______,                                     _______, _______, _______, _______, _______, _______, \
-    _______, _______, _______, _______, _______, _______,                                     _______, _______, _______, _______, _______, _______, \
-    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
+    _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                                     XXXXXXX, XXXXXXX, USER, PASS, KC_MPLY, _______, \
+    _______, XXXXXXX, SGUI(KC_A), A(KC_0), LAG(KC_C), XXXXXXX,                               XXXXXXX, G(KC_SPC), SGUI(KC_F), XXXXXXX, KC_MNXT, XXXXXXX, \
+    _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, _______, _______, _______, _______, XXXXXXX, XXXXXXX, DT_PRNT, DT_UP, DT_DOWN, _______, \
                                 _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
 
 #endif /* LAYERS */
