@@ -151,7 +151,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case PASS:
             if (record->event.pressed) {
                 // when keycode QMKBEST is pressed
-                SEND_STRING("[password]                                                                     ");
+                SEND_STRING("[password]");
             } else {
                 // when keycode QMKBEST is released
             }
