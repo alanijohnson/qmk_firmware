@@ -53,9 +53,9 @@
 *                        `----------------------------------'  `-----------------------------------'
 */
 #define qwerty_layout \
-KC_TAB  , KC_Q ,  KC_W   ,  KC_E  ,   KC_R ,   KC_T ,                                        KC_Y ,  KC_U ,  KC_I ,   KC_O ,  KC_P , DAILY, \
-CTL_ESC , KC_A ,  KC_S   ,  KC_D  ,   KC_F ,   KC_G ,                                        KC_H ,  KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT, \
-KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , BRACES , NAV,        KC_ROPT, KC_RCTL, KC_N ,  KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT, \
+KC_TAB  , KC_Q ,  KC_W   ,  KC_E  ,   KC_R ,   KC_T ,                                        KC_Y ,  KC_U ,  KC_I  ,   KC_O ,   KC_P  , DAILY, \
+CTL_ESC , KC_A ,  KC_S   ,  KC_D  ,   KC_F ,   KC_G ,                                        KC_H ,  KC_J ,  KC_K  ,   KC_L , KC_SCLN ,CTL_QUOT, \
+KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , BRACES , NAV,        KC_ROPT, KC_RCTL, KC_N ,  KC_M , KC_COMM, KC_DOT , KC_SLSH , KC_RSFT, \
                            FKEYS  ,  KC_DEL, KC_BSPC, KC_ENT , SYM,        KC_RGUI, KC_SPC , QUICK, CPYPST, CWRD_HYP
 
 
@@ -87,10 +87,10 @@ KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , BRACES , NAV,        KC_RO
 *                        `----------------------------------'  `----------------------------------'
 */
 #define nav_layer \
-    _______, KC_VOLU,  KC_VOLD,   KC_MUTE,     XXXXXXX, XXXXXXX,                                   KC_HOME, KC_HOME, KC_END,   KC_PGUP,  KC_PGDN, _______, \
-    _______, KC_LSFT,  KC_LCTL,   KC_LOPT,     KC_LGUI,   UNDO,                                     KC_END, KC_LEFT, KC_RGHT, KC_UP, KC_DOWN, _______, \
-    _______, PREV_APP, NEXT_APP, PREV_WINDOW, NEXT_WINDOW, REDO, _______, _______, _______, _______,LSA(KC_LEFT), SGUI(KC_LEFT), LSA(KC_RGHT), SGUI(KC_RGHT), _______,_______, \
-                                      _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
+    _______, KC_VOLU ,  KC_VOLD ,   KC_MUTE  ,   XXXXXXX  , XXXXXXX,                                     KC_HOME    ,   KC_HOME    ,    KC_END   ,   KC_PGUP    ,  KC_PGDN, _______, \
+    _______, KC_LSFT ,  KC_LCTL ,   KC_LOPT  ,   KC_LGUI  ,  UNDO  ,                                      KC_END    ,   KC_LEFT    ,    KC_RGHT  ,    KC_UP     ,  KC_DOWN, _______, \
+    _______, PREV_APP, NEXT_APP , PREV_WINDOW, NEXT_WINDOW,  REDO  , _______, _______, _______, _______,LSA(KC_LEFT), SGUI(KC_LEFT), LSA(KC_RGHT), SGUI(KC_RGHT), _______ , _______, \
+                                    _______  ,   _______  , _______, _______, _______, _______, _______, _______, _______, _______
 
 
 /*
@@ -128,10 +128,10 @@ KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , BRACES , NAV,        KC_RO
 // //                              _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
 // // ),
 #define sym_layer \
-    KC_GRV , KC_UNDS, KC_MINS, KC_AMPR, KC_LABK, KC_RABK,                                       ARROW  , KC_7 ,   KC_8 ,   KC_9 , XXXXXXX, _______, \
-    KC_PPLS, KC_EQL , KC_LCBR, KC_RCBR, KC_LBRC, KC_RBRC,                                     ELLIPSES, KC_4 ,   KC_5 ,   KC_6 , _______, _______, \
-    _______, KC_BSLS, KC_SLSH, KC_COLN, KC_LPRN, KC_RPRN, KC_PIPE, _______, _______, _______,    KC_0 , KC_1 ,   KC_2 ,   KC_3 , KC_QUES, _______, \
-                            _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
+    KC_GRV , KC_UNDS, KC_MINS, KC_AMPR, KC_LABK, KC_RABK,                                       ARROW  , KC_7   ,   KC_8 ,   KC_9 , XXXXXXX, _______, \
+    KC_PPLS, KC_EQL , KC_LCBR, KC_RCBR, KC_LBRC, KC_RBRC,                                     ELLIPSES , KC_4   ,   KC_5 ,   KC_6 , _______, _______, \
+    _______, KC_BSLS, KC_SLSH, KC_COLN, KC_LPRN, KC_RPRN, KC_PIPE, _______, _______, _______,   KC_0   , KC_1   ,   KC_2 ,   KC_3 , KC_QUES, _______, \
+                               _______, _______, _______, _______, _______, _______, _______,  _______ , _______, _______
 
 
 /*
@@ -154,7 +154,7 @@ KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , BRACES , NAV,        KC_RO
     _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                                     XXXXXXX,  KC_F7 ,  KC_F8 ,  KC_F9 , KC_F10 , _______, \
     _______, KC_LSFT, KC_LCTL, KC_LOPT, KC_LGUI, XXXXXXX,                                     XXXXXXX,  KC_F4 ,  KC_F5 ,  KC_F6 , KC_F11 , XXXXXXX, \
     _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, _______, _______, _______, _______, XXXXXXX,  KC_F1 ,  KC_F2 ,  KC_F3 , KC_F12 , _______, \
-                                _______, _______, _______, _______ , _______, _______, _______, _______, _______, _______
+                               _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
 
 
 /*
@@ -174,9 +174,9 @@ KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , BRACES , NAV,        KC_RO
  */
 
 #define daily_layer \
-    _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                                     XXXXXXX, XXXXXXX, USER, PASS, KC_MPLY, _______, \
-    _______, XXXXXXX, SGUI(KC_A), A(KC_0), LAG(KC_C), XXXXXXX,                               XXXXXXX, G(KC_SPC), SGUI(KC_F), XXXXXXX, KC_MNXT, XXXXXXX, \
-    _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, _______, _______, _______, _______, XXXXXXX, XXXXXXX, DT_PRNT, DT_UP, DT_DOWN, _______, \
-                                _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
+    _______, XXXXXXX,  XXXXXXX  , XXXXXXX ,  XXXXXXX , XXXXXXX,                                     XXXXXXX,  XXXXXXX ,   USER    ,  PASS  , KC_MPLY, _______, \
+    _______, XXXXXXX, SGUI(KC_A), A(KC_0) , LAG(KC_C), XXXXXXX,                                     XXXXXXX, G(KC_SPC), SGUI(KC_F), XXXXXXX, KC_MNXT, XXXXXXX, \
+    _______, XXXXXXX,  XXXXXXX  , XXXXXXX ,  XXXXXXX , XXXXXXX, _______, _______, _______, _______, XXXXXXX,  XXXXXXX ,  DT_PRNT  ,  DT_UP , DT_DOWN, _______, \
+                                  _______ ,  _______ , _______, _______, _______, _______, _______, _______, _______, _______
 
 #endif /* LAYERS */

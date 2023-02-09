@@ -5,7 +5,7 @@ enum custom_keycodes {
     ELLIPSES = SAFE_RANGE,
     ARROW,
     CPY_PST,
-e    USER,
+    USER,
     PASS,
 };
 
