@@ -128,15 +128,33 @@ void caps_reset(qk_tap_dance_state_t *state, void *user_data) {
     xtap_state.state = TD_NONE;
 }
 
+
+/*
+ * 
+ *
+ */
 void cpy_pst_finished(qk_tap_dance_state_t *state, void *user_data) {
     xtap_state.state = cur_dance(state);
     switch (xtap_state.state) {
         case TD_SINGLE_TAP: register_code16(G(KC_V)); break;  // command paste - less friction compare to double tap
-        case TD_DOUBLE_TAP: register_code16(G(KC_C)); break;
+        case TD_SINGLE_HOLD: 
+            if (get_mods() & MOD_MASK_SHIFT) {
+                register_code16(G(KC_X)); 
+                break;
+            }
+            register_code16(G(KC_C)); 
+            break;
+        case TD_DOUBLE_TAP: 
+            if (get_mods() & MOD_MASK_SHIFT) {
+                register_code16(KC_ENT); 
+                break;
+            }
+            register_code16(KC_RGHT); 
+            break;
         // Last case is for fast typing. Assuming your key is `f`:
         // For example, when typing the word `buffer`, and you want to make sure that you send `ff` and not `Esc`.
         // In order to type `ff` when typing fast, the next character will have to be hit within the `TAPPING_TERM`, which by default is 200ms.
-        case TD_DOUBLE_SINGLE_TAP: tap_code(KC_X); register_code(KC_X); break;
+        // case TD_DOUBLE_SINGLE_TAP: tap_code(KC_X); register_code(KC_X); break;
         default: break;
     }
 }
@@ -144,7 +162,20 @@ void cpy_pst_finished(qk_tap_dance_state_t *state, void *user_data) {
 void cpy_pst_reset(qk_tap_dance_state_t *state, void *user_data) {
     switch (xtap_state.state) {
         case TD_SINGLE_TAP: unregister_code16(G(KC_V)); break;
-        case TD_DOUBLE_TAP: unregister_code16(G(KC_C)); break;
+        case TD_SINGLE_HOLD: 
+            if (get_mods() & MOD_MASK_SHIFT) {
+                unregister_code16(G(KC_X)); 
+                break;
+            }
+            unregister_code16(G(KC_C)); 
+            break;
+        case TD_DOUBLE_TAP: 
+            if (get_mods() & MOD_MASK_SHIFT) {
+                unregister_code16(KC_ENT); 
+                break;
+            }
+            unregister_code16(KC_RGHT); 
+            break;
         default: break;
     }
     xtap_state.state = TD_NONE;
@@ -155,37 +186,48 @@ void layer_finished(qk_tap_dance_state_t *state, void *user_data) {
     int layer = data->layer;
 
     xtap_state.state = cur_dance(state);
+
     switch (xtap_state.state) {
+        case TD_SINGLE_TAP: // action controlled in reset alone
+            break;
+
         case TD_SINGLE_HOLD: { // set layer until release
-            layer_clear();
+            if(get_oneshot_layer() != 0) {
+                    // reset the one shot state      uprintf("reset os (%d)\n", get_oneshot_layer());
+                    reset_oneshot_layer();
+            }
+            // set layer                             uprintf("single - after (%d)\n", get_oneshot_layer());
             layer_move(layer); 
             break; 
         } 
         case TD_DOUBLE_TAP: { // lock layer toggle. Turns off any existing layers
-            // uprintf("finish double - oneshot layer %d\n", get_oneshot_layer());
-            // uprintf("finish double - layer active %d\n", layer_state_is(layer));
-
+            
             // one shot layer is active. Restore state so button can function as lock
             if (get_oneshot_layer() != 0) {
-                // print("resetting oneshot + turning off layer\n");
                 reset_oneshot_layer();
-                // layer_off(layer);
                 layer_clear();
             }
 
+            // if layer is set from lock already
             if (layer_state_is(layer)) {
-                // print("turning off layer\n");
-                // layer_off(layer);
                 layer_clear();
             } else {
-                // print("turning on layer\n");
                 layer_clear();
                 layer_on(layer);
             }
             break;
         } 
-        default: break;
+        default: 
+            uprint("default\n");
+            if(get_oneshot_layer() != 0) {
+                    uprintf("reset os (%d)\n", get_oneshot_layer());
+                    reset_oneshot_layer();
+            }
+            uprint("default end\n");
+            break;
     }
+    uprintf("finish end layer %d\n", layer);
+
 }
 
 void layer_reset(qk_tap_dance_state_t *state, void *user_data) {
@@ -194,21 +236,18 @@ void layer_reset(qk_tap_dance_state_t *state, void *user_data) {
 
     switch (xtap_state.state) {
         case TD_SINGLE_TAP: {
-            // uprintf("reset single - oneshot layer %d\n", get_oneshot_layer());
-            // uprintf("reset single - layer active %d\n", layer_state_is(layer));
             
-            // reset oneshot layer on single tap
-            if(get_oneshot_layer() == layer || layer_state_is(layer)) { 
+            if(get_oneshot_layer() == layer || layer_state_is(layer)) { // reset oneshot layer on single tap and clear existing layer if lock is set
+                
                 if(get_oneshot_layer() != 0) {
-                    // uprintf("reset os (%d)\n", get_oneshot_layer());
+                    uprintf("reset os (%d)\n", get_oneshot_layer());
                     reset_oneshot_layer();
                 }
 
                 layer_clear();
 
-            } else {
+            } else { 
                 // turn on one shot
-                // uprintf("turn on os (%d)\n", layer);
                 layer_clear();
                 set_oneshot_layer(layer, ONESHOT_START);
                 clear_oneshot_layer_state(ONESHOT_PRESSED);
@@ -216,8 +255,6 @@ void layer_reset(qk_tap_dance_state_t *state, void *user_data) {
             break;
         }
         case TD_SINGLE_HOLD: layer_off(layer); break;
-        // case TD_DOUBLE_TAP: unregister_code(KC_D); break;
-        // case TD_DOUBLE_SINGLE_TAP: unregister_code(KC_X); break;
         default: {break;}
     }
     xtap_state.state = TD_NONE;

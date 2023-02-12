@@ -40,6 +40,11 @@
  *  -- Implemented Dynamic tapping term 
  *  -- Finalized first full iteration of layers
  *
+ * v3.1.0 (Feb 12 2020):
+ *  -- move keymap to new library and restore default
+ *  -- Updated Copy Paste Key to include arrow, cut, enter actions
+ *  -- fix layer tap dance not turning off one shot on double click
+ *
  * Details on derivation below
  * Copyright 2019 Thomas Baart <thomas@splitkb.com>
  *
@@ -186,17 +191,19 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case TD(FUNCTION_TD):
         case TD(SYMBOL_TD):
         case TD(NAV_TD):
-            // print("process user record\n");
+            print("process user record\n");
+            // get tap dance data
             action = &tap_dance_actions[getTDIndexFromKeycode(keycode)];
             td_layer_tap_t *data = (td_layer_tap_t *) action->user_data;
 
-            // uprintf("process user record - get_oneshot_layer(): %d\n", get_oneshot_layer());
-            // uprintf("process user record - layer: %d\n", data->layer);
-            if (get_oneshot_layer() == data->layer) {
-                // print("process user record - set one shot to pressed\n");
-                set_oneshot_layer(data->layer, ONESHOT_PRESSED);
-                // return false;
-            }
+            if (record->event.pressed) {
+                if (get_oneshot_layer() == data->layer) { // if one shot is current layer, repress the one shot key
+                    set_oneshot_layer(data->layer, ONESHOT_PRESSED);
+                } else if (get_oneshot_layer() != 0) { // clear any other one shot when another key is pressed
+                    reset_oneshot_layer();
+                    layer_clear();
+                }
+            } 
 
             return true;
     }
